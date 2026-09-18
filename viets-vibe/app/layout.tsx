@@ -24,6 +24,7 @@ const editorialFont = Playfair_Display({
 export const metadata: Metadata = {
   title: "Việt's Vibe | Khám phá Việt Phục",
   description: "Một không gian để khám phá và biến tấu Việt phục.",
+  themeColor: "#180e0d",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
