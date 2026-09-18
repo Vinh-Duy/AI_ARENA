@@ -72,6 +72,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Vui lòng chọn một dịp phối đồ." }, { status: 400 });
     }
 
+    if (occasion.length > 80 || imageDescription.length > 500) {
+      return NextResponse.json({ error: "Thông tin phối đồ vượt quá độ dài cho phép." }, { status: 400 });
+    }
+
     if (!imageBase64 && !imageDescription) {
       return NextResponse.json({ error: "Vui lòng tải ảnh hoặc mô tả món đồ cần phối." }, { status: 400 });
     }
