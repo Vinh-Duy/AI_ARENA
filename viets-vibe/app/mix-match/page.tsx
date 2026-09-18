@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 const occasions = ["Dạo phố", "Sự kiện", "Tết"];
+const maxUploadBytes = 7 * 1024 * 1024;
 
 type StyleSuggestion = {
   "tên_trang_phục": string;
@@ -49,6 +50,11 @@ export default function MixMatchPage() {
   }, []);
 
   function handleFile(file?: File) {
+    if (file && file.size > maxUploadBytes) {
+      setErrorMessage("Ảnh cần nhỏ hơn 7 MB để có thể phối đồ.");
+      return;
+    }
+
     if (file?.type.startsWith("image/")) {
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
       const objectUrl = URL.createObjectURL(file);
