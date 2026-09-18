@@ -53,7 +53,7 @@ export default function Home() {
           <h1 className="max-w-4xl font-display text-[clamp(3.6rem,9vw,8.5rem)] font-medium leading-[0.82] tracking-[-0.04em] text-[#f3ead7]">Khám phá <em className="font-normal text-[#d9a95b]">&amp;</em><br />Biến tấu<br />Việt Phục</h1>
           <div className="mt-10 flex flex-col gap-8 md:mt-12 md:flex-row md:items-end md:justify-between">
             <p className="max-w-xs text-sm leading-6 text-[#d5c7b7]">Nơi truyền thống khoác lên mình một nhịp thở mới. Tìm thấy chất riêng trong từng nếp vải Việt.</p>
-            <motion.a href="#explore" whileHover={{ scale: 1.04, backgroundColor: "#e5b96c" }} whileTap={{ scale: 0.98 }} className="group flex w-fit items-center gap-8 border border-[#d9a95b] bg-[#d9a95b] px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#261210] transition-colors">Thử ngay <ArrowUpRight size={17} strokeWidth={1.6} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></motion.a>
+            <motion.a href="/mix-match" whileHover={{ scale: 1.04, backgroundColor: "#e5b96c" }} whileTap={{ scale: 0.98 }} className="group flex w-fit items-center gap-8 border border-[#d9a95b] bg-[#d9a95b] px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#261210] transition-colors">Thử ngay <ArrowUpRight size={17} strokeWidth={1.6} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" /></motion.a>
           </div>
         </motion.div>
         <p className="absolute bottom-16 right-8 z-10 hidden text-[10px] uppercase tracking-[0.25em] text-[#b6a596] [writing-mode:vertical-rl] md:block lg:right-16">Bắt đầu hành trình của bạn</p>
