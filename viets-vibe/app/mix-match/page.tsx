@@ -182,7 +182,7 @@ export default function MixMatchPage() {
             ) : errorMessage ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-sm text-center"><p className="font-editorial text-2xl italic text-[#f3ead7]">Chưa thể dệt nên gợi ý.</p><p className="mt-3 text-xs leading-5 text-[#b6a596]">{errorMessage}</p></motion.div>
             ) : (
-              <div className="max-w-sm text-center"><div className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-[46%_54%_48%_52%/52%_46%_54%_48%] border border-[#d9a95b]/25 text-[#d9a95b]/70"><Sparkles size={25} strokeWidth={1} /></div><p className="font-editorial text-3xl italic text-[#f3ead7]">Lookbook Result</p><p className="mt-3 text-xs leading-5 text-[#806c62]">Chọn một món đồ hoặc một dịp để bắt đầu bản phối riêng của bạn.</p></div>
+              <div className="max-w-sm text-center"><div className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-[46%_54%_48%_52%/52%_46%_54%_48%] border border-[#d4ad63]/25 text-[#d4ad63]/70"><Sparkles size={25} strokeWidth={1} /></div><p className="font-editorial text-3xl italic text-[#f5ecd8]">Lookbook Result</p><p className="mt-3 text-xs leading-5 text-[#87937d]">Chọn một món đồ hoặc một dịp để bắt đầu bản phối riêng của bạn.</p><div aria-label="Bảng màu mẫu" className="mt-7 flex justify-center gap-3">{heritagePalette.map((swatch) => <span key={swatch.name} title={swatch.name} className="h-5 w-5 rounded-full border border-[#f5ecd8]/20" style={{ backgroundColor: swatch.color }} />)}</div></div>
             )}
           </div>
 
