@@ -44,6 +44,31 @@ body {
   pointer-events: none;
 }
 
+.hero-image {
+  background-image: url("https://images.unsplash.com/photo-1528181304800-259b088140f1?q=80&w=2000");
+  background-position: center;
+  background-size: cover;
+  filter: saturate(0.82) contrast(1.06);
+  transform: scale(1.015);
+}
+
+.hero-overlay {
+  background:
+    linear-gradient(180deg, rgba(16, 26, 22, 0.38) 0%, rgba(16, 26, 22, 0.12) 38%, rgba(16, 26, 22, 0.94) 100%),
+    linear-gradient(100deg, rgba(7, 13, 10, 0.94) 0%, rgba(10, 18, 14, 0.72) 36%, rgba(16, 26, 22, 0.08) 76%),
+    radial-gradient(circle at 72% 34%, rgba(212, 173, 99, 0.16), transparent 30%);
+}
+
+.hero-overlay::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 18%;
+  background: linear-gradient(180deg, transparent, #17251e 92%);
+  content: "";
+}
+
 .glass-card {
   background: linear-gradient(145deg, rgba(43, 69, 55, 0.72), rgba(21, 29, 23, 0.7));
   border: 1px solid rgba(245, 236, 216, 0.14);
