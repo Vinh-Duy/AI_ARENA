@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
@@ -24,6 +24,9 @@ const editorialFont = Playfair_Display({
 export const metadata: Metadata = {
   title: "Việt's Vibe | Khám phá Việt Phục",
   description: "Một không gian để khám phá và biến tấu Việt phục.",
+};
+
+export const viewport: Viewport = {
   themeColor: "#180e0d",
 };
 
