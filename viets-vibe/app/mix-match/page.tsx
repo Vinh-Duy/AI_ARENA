@@ -106,22 +106,22 @@ export default function MixMatchPage() {
   const canGenerate = Boolean(selectedImage || occasion);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#180e0d] text-[#f3ead7]">
+    <main className="relative min-h-screen overflow-hidden bg-[#101a16] text-[#f5ecd8]">
       <div className="grain pointer-events-none absolute inset-0 z-20" />
       <header className="relative z-30 flex h-20 items-center justify-between border-b border-[#f3ead7]/10 px-6 md:px-12 lg:px-16">
         <Link href="/" className="group flex items-center gap-3" aria-label="Về trang chủ">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d9a95b]/60 text-[#d9a95b] transition-colors group-hover:bg-[#d9a95b] group-hover:text-[#180e0d]"><Sparkles size={15} strokeWidth={1.5} /></span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d4ad63]/60 text-[#d4ad63] transition-colors group-hover:bg-[#d4ad63] group-hover:text-[#101a16]"><Sparkles size={15} strokeWidth={1.5} /></span>
           <span className="font-display text-xl tracking-wide">VIET&apos;S VIBE</span>
         </Link>
-        <Link href="/" className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#b6a596] transition-colors hover:text-[#f3ead7]"><ArrowLeft size={15} strokeWidth={1.5} /> Về trang chủ</Link>
+        <Link href="/" className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#b9b49d] transition-colors hover:text-[#f5ecd8]"><ArrowLeft size={15} strokeWidth={1.5} /> Về trang chủ</Link>
       </header>
 
       <div className="relative z-10 mx-auto grid max-w-[1500px] gap-0 lg:min-h-[calc(100vh-5rem)] lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
         <section className="glass-card border-b border-[#f3ead7]/10 px-7 py-14 md:px-14 lg:border-b-0 lg:border-r lg:px-20 lg:py-20">
           <div className="mb-10 max-w-lg">
-            <p className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d9a95b]"><span className="h-px w-10 bg-[#d9a95b]" />01 / Bắt đầu</p>
-            <h1 className="font-display text-6xl leading-[0.88] tracking-[-0.03em] md:text-7xl">Phối đồ<br /><em className="font-editorial font-normal text-[#d9a95b]">theo</em> chất riêng.</h1>
-            <p className="mt-6 max-w-sm text-sm leading-6 text-[#b6a596]">Đưa một món đồ bạn yêu thích vào đây. Chúng tôi sẽ tìm nhịp điệu phù hợp cho dịp sắp tới.</p>
+            <p className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d4ad63]"><span className="h-px w-10 bg-[#d4ad63]" />01 / Bắt đầu</p>
+            <h1 className="font-editorial text-6xl leading-[0.88] tracking-[-0.03em] md:text-7xl">Phối đồ<br /><em className="font-normal text-[#d4ad63]">theo</em> chất riêng.</h1>
+            <p className="mt-6 max-w-sm text-sm leading-6 text-[#b9b49d]">Đưa một món đồ bạn yêu thích vào đây. Chúng tôi sẽ tìm nhịp điệu phù hợp cho dịp sắp tới.</p>
           </div>
 
           <label
