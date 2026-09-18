@@ -29,3 +29,9 @@ cp .env.example .env.local
 ```
 
 The key is used only by the server route at `/api/style`.
+
+## Routes
+
+- `/` — editorial homepage and Việt phục gallery
+- `/mix-match` — upload a clothing item or choose an occasion for styling advice
+- `POST /api/style` — returns a structured Vietnamese styling suggestion
