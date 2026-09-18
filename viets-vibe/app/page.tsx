@@ -96,7 +96,8 @@ export default function Home() {
       </nav>
 
       <section id="top" className="relative isolate flex min-h-screen items-end px-6 pb-12 pt-32 md:px-12 md:pb-16 lg:px-16">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_38%,rgba(105,133,91,0.3),transparent_30%),linear-gradient(115deg,#101a16_12%,rgba(16,26,22,0.72)_52%,rgba(16,26,22,0.35)),url('https://source.unsplash.com/1600x900/?vietnam,nature,lotus,temple')] bg-cover bg-[center_28%]" />
+        <div className="hero-image absolute inset-0" />
+        <div className="hero-overlay absolute inset-0" />
         <div className="absolute right-[8%] top-[24%] hidden h-56 w-56 rounded-full border border-[#d4ad63]/25 md:block" />
         <div className="absolute right-[13%] top-[31%] hidden h-44 w-44 rounded-full border border-[#d4ad63]/15 md:block" />
 
