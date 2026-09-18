@@ -95,6 +95,8 @@ body {
 
 .heritage-book {
   filter: drop-shadow(0 32px 34px rgba(0, 0, 0, 0.38));
+  perspective: 1800px;
+  transform-style: preserve-3d;
 }
 
 .book-page {
@@ -164,6 +166,7 @@ body {
 .book-image-page {
   position: relative;
   z-index: 1;
+  box-shadow: inset 0 -22px 28px rgba(16, 26, 22, 0.28), inset 0 1px 0 rgba(245, 236, 216, 0.16);
 }
 
 ::-webkit-scrollbar {
