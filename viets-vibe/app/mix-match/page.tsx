@@ -151,6 +151,7 @@ export default function MixMatchPage() {
 
           <div className="my-8 flex items-center gap-4 text-[10px] uppercase tracking-[0.25em] text-[#87937d]"><span className="h-px flex-1 bg-[#f5ecd8]/10" />hoặc chọn dịp<span className="h-px flex-1 bg-[#f5ecd8]/10" /></div>
           <div className="relative">
+            <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#87937d]">Chọn bối cảnh để AI hiểu nhịp điệu bạn muốn</p>
             <select aria-label="Chọn dịp phối đồ" value={occasion} onChange={(event) => { setOccasion(event.target.value); setResult(null); setErrorMessage(null); }} className="w-full appearance-none border border-[#f5ecd8]/20 bg-[#243d32]/45 px-5 py-4 text-sm text-[#f5ecd8] outline-none transition-colors focus:border-[#d4ad63]">
               <option value="" disabled>Chọn một dịp đặc biệt</option>
               {occasions.map((item) => <option key={item} value={item}>{item}</option>)}
