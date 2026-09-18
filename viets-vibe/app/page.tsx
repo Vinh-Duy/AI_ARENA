@@ -38,7 +38,7 @@ export default function Home() {
         </a>
         <div className="hidden items-center gap-10 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#b6a596] md:flex">
           <a className="transition-colors hover:text-[#f3ead7]" href="#explore">Explore</a>
-          <a className="transition-colors hover:text-[#f3ead7]" href="#mix">Mix &amp; Match</a>
+          <a className="transition-colors hover:text-[#f3ead7]" href="/mix-match">Mix &amp; Match</a>
         </div>
         <button className="flex h-10 w-10 items-center justify-center text-[#f3ead7] md:hidden" aria-label="Mở menu"><Menu size={21} strokeWidth={1.5} /></button>
       </nav>
