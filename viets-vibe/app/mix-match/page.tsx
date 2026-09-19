@@ -41,9 +41,20 @@ import {
   type SavedLook,
 } from "../lib/heritage";
 import { readLooks, writeLooks } from "../lib/lookbook";
+import { backdrops, findBackdrop } from "../lib/backdrops";
+import { validSuggestion, type OutfitRecommendation } from "../lib/stylist";
+import { BrandMark } from "../components/brand-mark";
 
 function Studio() {
   const params = useSearchParams();
+  const [backdropId, setBackdropId] = useState(
+    () => findBackdrop(params.get("backdrop")).id,
+  );
+  const backdrop = findBackdrop(backdropId);
+  const [goal, setGoal] = useState("");
+  const [applied, setApplied] = useState(false);
+  const [previousOutfit, setPreviousOutfit] =
+    useState<OutfitRecommendation | null>(null);
   const [avatar, setAvatar] = useState(() =>
     avatarFromQuery(params.get("avatar")),
   );
@@ -94,6 +105,8 @@ function Studio() {
     setResult(null);
     setSaved(false);
     setMessage("");
+    setApplied(false);
+    setPreviousOutfit(null);
   }
   function upload(f?: File) {
     if (!f) return;
@@ -172,19 +185,32 @@ function Studio() {
           color: colorName,
           vibe,
           accessories: extras,
+          goal,
+          backdrop: backdropId,
+          layers: {
+            inner: avatar.inner,
+            bottom: avatar.bottom,
+            accent: avatar.accent,
+            shoes: avatar.shoes,
+            bottomType: avatar.bottomType,
+            footwear: avatar.footwear,
+            collar: avatar.collar,
+          },
           imageBase64,
           mimeType: file?.type,
           imageDescription: `Mockup 3D: lớp dưới ${avatar.bottomType}, giày ${avatar.footwear}, màu trong ${avatar.inner}, màu dưới ${avatar.bottom}, màu phụ kiện ${avatar.accent}, giữ cổ áo ${avatar.collar}. Lưu ý: ${warnings.map((w) => w.title).join("; ")}.`,
         }),
       });
       const data = await response.json();
-      if (!response.ok || !data.suggestion)
+      if (!response.ok || !validSuggestion(data.suggestion))
         throw new Error(
           data.error || "Chưa thể kết nối stylist. Bạn thử lại nhé.",
         );
       setResult(data.suggestion);
       setResultSource("GỢI Ý TỪ GOOGLE GEMINI");
       setSaved(false);
+      setApplied(false);
+      setPreviousOutfit(null);
     } catch (error) {
       setMessage(
         error instanceof Error && error.name === "TimeoutError"
@@ -197,6 +223,13 @@ function Studio() {
       setBusy(false);
     }
   }
+  function applyOutfit(outfit: OutfitRecommendation) {
+    setGarmentId(outfit.garment);
+    setColorName(outfit.color);
+    setExtras([...outfit.accessories]);
+    setAvatar((current) => ({ ...current, ...outfit.layers }));
+    setSaved(false);
+  }
   function save() {
     try {
       const looks = readLooks();
@@ -208,8 +241,9 @@ function Studio() {
         vibe,
         accessories: extras,
         avatar,
+        backdrop: backdropId,
         thumbnail: avatarRef.current?.thumbnail(),
-        ...(result ? { result } : {}),
+        ...(result && (!result.bản_phối || applied) ? { result } : {}),
       };
       writeLooks([look, ...looks].slice(0, 30));
       setSaved(true);
@@ -228,6 +262,7 @@ function Studio() {
       vibe,
       extras: extras.join(","),
       avatar: JSON.stringify(avatar),
+      backdrop: backdropId,
     });
     const url = `${location.origin}/mix-match?${query}`;
     try {
@@ -253,7 +288,8 @@ function Studio() {
               <p>Chọn dáng người. Khoác nếp áo. Xoay để thấy chất riêng.</p>
             </div>
             <span className="powered-pill">
-              <span className="gemini-symbol">✦</span> Cùng Google Gemini
+              <BrandMark className="gemini-symbol" size={20} /> Cùng Google
+              Gemini
             </span>
           </div>
         </Reveal>
@@ -473,8 +509,21 @@ function Studio() {
               <p className="upload-note">
                 Ảnh chỉ gửi tới Google khi bạn chọn gợi ý từ Gemini.
               </p>
+              <label className="stylist-goal">
+                Bạn muốn stylist giúp gì?
+                <textarea
+                  maxLength={400}
+                  rows={3}
+                  value={goal}
+                  placeholder="VD: Phối đi chụp kỷ yếu ở Văn Miếu, nhẹ nhàng, ít phụ kiện và dễ tìm đồ."
+                  onChange={(e) => {
+                    setGoal(e.target.value);
+                    changed();
+                  }}
+                />
+              </label>
               <button
-                className="button button-orange full-button"
+                className="button button-primary full-button"
                 onClick={compose}
               >
                 Tạo bản phối của tôi <ArrowUpRight size={18} />
@@ -493,6 +542,10 @@ function Studio() {
                   ? "Gemini đang tìm cảm hứng…"
                   : "Gợi ý sâu hơn cùng Gemini"}
               </button>
+              <p className="upload-note">
+                AI tư vấn cả bộ: áo, bảng màu, quần/váy, giày và phụ kiện. Bạn
+                xem rồi chọn áp dụng.
+              </p>
             </fieldset>
           </section>
           <section
@@ -507,6 +560,8 @@ function Studio() {
                 disabled={busy}
                 onClick={() => {
                   setAvatar({ ...defaultAvatar });
+                  setBackdropId("studio");
+                  setGoal("");
                   setGarmentId("ao-dai");
                   setColorName("Ngọc bích");
                   setOccasion("Dạo phố");
@@ -521,13 +576,127 @@ function Studio() {
               </button>
             </div>
             <div className="canvas-anchor" id="studio-canvas" />
+            <div className="backdrop-picker">
+              <div className="backdrop-heading">
+                <span className="eyebrow">MẶC ĐẸP, ĐÚNG KHUNG CẢNH</span>
+                <span>Hà Nội trong bản phối của bạn</span>
+              </div>
+              <div
+                className="backdrop-options"
+                role="group"
+                aria-label="Chọn bối cảnh"
+              >
+                {backdrops.map((b) => (
+                  <button
+                    key={b.id}
+                    aria-pressed={backdropId === b.id}
+                    onClick={() => {
+                      setBackdropId(b.id);
+                      changed();
+                    }}
+                    disabled={busy}
+                  >
+                    <span className="backdrop-thumb">
+                      {b.image ? (
+                        <Image src={b.image} alt="" fill sizes="180px" />
+                      ) : (
+                        <BrandMark size={28} />
+                      )}
+                    </span>
+                    <span>{b.name}</span>
+                  </button>
+                ))}
+              </div>
+              <p>{backdrop.description}</p>
+            </div>
             <AvatarCanvas
               ref={avatarRef}
               garment={garmentId}
               color={color.hex}
               extras={extras}
               avatar={avatar}
+              backdrop={backdropId}
             />
+            {result?.bản_phối && (
+              <section
+                className="stylist-proposal"
+                aria-label="Bản phối stylist đề xuất"
+              >
+                <span className="eyebrow">
+                  <BrandMark size={18} /> GOOGLE GEMINI / STYLIST CỦA BẠN
+                </span>
+                <h2>Một tổng thể có chủ ý.</h2>
+                <p>{result.nhận_xét}</p>
+                <p>{result.lý_do}</p>
+                <div className="proposal-palette">
+                  {[
+                    colors.find((c) => c.name === result.bản_phối!.color)!.hex,
+                    result.bản_phối.layers.inner,
+                    result.bản_phối.layers.bottom,
+                    result.bản_phối.layers.accent,
+                    result.bản_phối.layers.shoes,
+                  ].map((hex, i) => (
+                    <i key={i} style={{ background: hex }} />
+                  ))}
+                </div>
+                <p className="proposal-summary">
+                  {
+                    garments.find((g) => g.id === result.bản_phối!.garment)
+                      ?.name
+                  }{" "}
+                  · {result.bản_phối.color} ·{" "}
+                  {result.bản_phối.layers.bottomType === "skirt"
+                    ? "Váy dài"
+                    : "Quần dài"}{" "}
+                  ·{" "}
+                  {result.bản_phối.layers.footwear === "sneakers"
+                    ? "Sneaker"
+                    : "Giày bệt"}{" "}
+                  · {result.bản_phối.accessories.join(", ") || "Không phụ kiện"}
+                </p>
+                <div className="look-actions">
+                  <button
+                    className="button button-primary"
+                    disabled={applied || busy}
+                    onClick={() => {
+                      setPreviousOutfit({
+                        garment: garmentId,
+                        color: colorName,
+                        accessories: [...extras],
+                        layers: {
+                          inner: avatar.inner,
+                          bottom: avatar.bottom,
+                          accent: avatar.accent,
+                          shoes: avatar.shoes,
+                          bottomType: avatar.bottomType,
+                          footwear: avatar.footwear,
+                          collar: avatar.collar,
+                        },
+                      });
+                      applyOutfit(result.bản_phối!);
+                      setApplied(true);
+                      setMessage("Đã áp dụng bản phối AI lên ma-nơ-canh.");
+                    }}
+                  >
+                    {applied ? <Check size={16} /> : <Sparkles size={16} />}{" "}
+                    {applied ? "Đã áp dụng bản phối AI" : "Áp dụng bản phối AI"}
+                  </button>
+                  {applied && previousOutfit && (
+                    <button
+                      className="button button-outline"
+                      onClick={() => {
+                        applyOutfit(previousOutfit);
+                        setApplied(false);
+                        setPreviousOutfit(null);
+                        setMessage("Đã trở lại bản phối trước khi áp dụng AI.");
+                      }}
+                    >
+                      Trở lại bản phối trước
+                    </button>
+                  )}
+                </div>
+              </section>
+            )}
             <div className="palette-insight">
               <div>
                 {[

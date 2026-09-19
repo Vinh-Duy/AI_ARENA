@@ -1,4 +1,5 @@
 import type { AvatarConfig } from "./avatar";
+import type { OutfitRecommendation } from "./stylist";
 const collection = [
   {
     id: "ao-dai",
@@ -272,6 +273,9 @@ export type StyleSuggestion = {
   nguồn_gốc: string;
   gợi_ý_phối: string[];
   cảnh_báo_văn_hóa: string;
+  nhận_xét?: string;
+  lý_do?: string;
+  bản_phối?: OutfitRecommendation;
 };
 export type SavedLook = {
   id: string;
@@ -283,4 +287,5 @@ export type SavedLook = {
   result?: StyleSuggestion;
   avatar?: AvatarConfig;
   thumbnail?: string;
+  backdrop?: string;
 };
