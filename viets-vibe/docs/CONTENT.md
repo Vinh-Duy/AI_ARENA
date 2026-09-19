@@ -1,5 +1,11 @@
 # Nội dung và hình ảnh
 
+## Phông nền Hà Nội
+
+Phông hiện tại trong `public/images/hanoi-*-illustration.png` là minh họa tạo bằng AI theo phong cách 3D cách điệu. Đây là raster 2D, kiến trúc được giản lược, không phải ảnh thực địa hay tài sản phục dựng. Canvas, PNG tải xuống và `/credits` ghi rõ tính chất minh họa. Xem bộ prompt trong [BACKDROP-PROMPTS.md](BACKDROP-PROMPTS.md).
+
+Các ảnh chụp cũ `public/images/hanoi-*.jpg` được giữ để đối chiếu thumbnail của bản lưu cũ: Wikimedia Commons, CC BY 2.0 (Hồ Gươm: xiquinhosilva; cầu Long Biên: David McKelvey) và CC BY 4.0 (Khuê Văn Các: Sai Gon Dep Lam). URL gốc, tác giả và giấy phép nằm trong `legacyPhotoBackdrops` tại `app/lib/backdrops.ts` và phần lưu trữ ở `/credits`. Giấy phép này không áp dụng cho các phông AI mới hoặc ảnh trang phục khác.
+
 ## Nguồn dữ liệu duy nhất
 
 `app/lib/heritage.ts` chứa nội dung và provenance cho từng trang phục. Các trường `source`/`sourceName` chỉ tư liệu văn hóa; `imageSource`/`imageCredit`/`imageOriginal` chỉ ảnh. `imageNote` phân biệt ảnh đương đại với hiện vật hoặc phục dựng. Trang `/credits` lấy trực tiếp dữ liệu này để hạn chế lệch nguồn.

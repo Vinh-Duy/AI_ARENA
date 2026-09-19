@@ -1,5 +1,15 @@
 # Kiến trúc
 
+## Stylist theo toàn bộ bản phối
+
+Client gửi lựa chọn áo, bảng màu, các lớp trang phục, phụ kiện, sự kiện, `goal` (tối đa 400 ký tự) và ID phông nền. Dáng người và sắc da không gửi trong phần `layers`. Google nhận mô tả biên tập của địa danh, không nhận ảnh phông hoặc screenshot canvas. Ảnh món đồ chỉ gửi nếu người dùng tải ảnh lên và chủ động gọi Gemini.
+
+Phản hồi giữ các trường gợi ý cũ và thêm `nhận_xét`, `lý_do`, `bản_phối`. `lib/stylist.ts` kiểm tra danh mục áo/màu/phụ kiện, màu hex và kiểu lớp đồ trước khi API trả về hoặc client áp dụng. Người dùng bấm áp dụng mới đổi canvas; có hoàn tác. Bản lưu trước khi áp dụng không gắn lời mô tả của bộ AI vào bộ đang mặc. Lỗi từ Google được phân loại và trả thông báo đã biên tập, không chuyển nguyên lỗi nhà cung cấp cho client.
+
+## Phông Hà Nội
+
+`lib/backdrops.ts` quản lý ba phông minh họa AI dạng PNG, phong cách 3D cách điệu; dữ liệu ảnh chụp cũ giữ riêng trong `legacyPhotoBackdrops` để ghi nguồn thumbnail cũ. Texture nền cắt khung theo tỉ lệ canvas, không quay cùng camera. Đây là phông 2D để hình dung phối màu, không phải không gian địa danh 3D. Khi thay phông, texture cũ được giải phóng; lỗi tải có thông báo và khóa xuất ảnh tới khi chọn được phông hợp lệ. ID phông được giữ trong URL/lookbook, ảnh chụp canvas đã có nền. PNG ghi rõ phông minh họa AI; thumbnail dẫn tới thông tin hình ảnh tại trang credits.
+
 ## Luồng trải nghiệm
 
 ```mermaid
@@ -47,12 +57,28 @@ Response 200:
     "tên_trang_phục": "Áo ngũ thân xanh ngọc",
     "nguồn_gốc": "Tóm tắt tham khảo",
     "gợi_ý_phối": ["Một gợi ý cụ thể"],
-    "cảnh_báo_văn_hóa": "Lưu ý theo bối cảnh"
+    "cảnh_báo_văn_hóa": "Lưu ý theo bối cảnh",
+    "nhận_xét": "Nhận xét toàn bộ lựa chọn hiện tại",
+    "lý_do": "Giải thích màu và phụ kiện theo sự kiện, phông nền",
+    "bản_phối": {
+      "garment": "ngu-than",
+      "color": "Ngọc bích",
+      "accessories": ["Quạt giấy"],
+      "layers": {
+        "inner": "#f4e8ce",
+        "bottom": "#eee2c9",
+        "accent": "#b99857",
+        "shoes": "#3f342e",
+        "bottomType": "trousers",
+        "footwear": "flats",
+        "collar": true
+      }
+    }
   }
 }
 ```
 
-Lỗi trả `{ "error": "Thông báo tiếng Việt" }`: 400 dữ liệu không hợp lệ, 413 ảnh quá lớn, 415 định dạng ảnh không hỗ trợ, 503 thiếu key; lỗi nhà cung cấp hiện được gom thành 500. Không trả API key hoặc lỗi nội bộ trực tiếp cho client. Server kiểm tra schema phản hồi trước khi trả về.
+Lỗi trả `{ "error": "Thông báo tiếng Việt" }`: 400 dữ liệu không hợp lệ, 413 ảnh quá lớn, 415 định dạng ảnh không hỗ trợ, 503 thiếu key hoặc Google đang bận, 429 quota, 504 timeout, 502 lỗi key/quyền/model hoặc phản hồi nhà cung cấp không hợp lệ. Thông báo phân biệt từng lỗi cấu hình nhưng không trả API key hoặc lỗi nội bộ trực tiếp cho client. Server kiểm tra schema phản hồi trước khi trả về.
 
 ## Dữ liệu văn hóa
 

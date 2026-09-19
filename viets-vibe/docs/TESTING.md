@@ -2,9 +2,15 @@
 
 ## Kết quả kiểm tra gần nhất
 
-Ngày 19/09/2026, trên môi trường macOS và Chrome: `npm run check`, `npm run format:check`, production build và **13/13 ca E2E** đều qua. Đã xem ảnh chụp desktop/mobile của thư viện, trang chi tiết và studio 3D; kiểm tra cả mặt trước/mặt sau của sáu phom. Các ca mới kiểm tra đổi dáng/sắc da/lớp đồ, cảnh báo, xoay, xuất PNG, thumbnail và khôi phục lookbook, URL sai cấu hình và WebGL không khả dụng. Gemini thật, Docker và workflow CI trên GitHub chưa được chạy xác nhận.
+Ngày 19/09/2026, trên môi trường macOS và Chrome: production build và **15/15 ca E2E** đều qua. Đã xem ảnh chụp desktop/mobile của thư viện, trang chi tiết và studio 3D; kiểm tra cả mặt trước/mặt sau của sáu phom. Các ca kiểm tra đổi dáng/sắc da/lớp đồ, cảnh báo, xoay, xuất PNG, thumbnail và khôi phục lookbook, URL sai cấu hình và WebGL không khả dụng.
+
+Hai ca mới kiểm tra ba phông Hà Nội, lưu/khôi phục phông, áp dụng/hoàn tác bản phối AI, lỗi tải phông và phản hồi AI sai schema. Đã gọi API ứng dụng với Google thật bằng `gemini-flash-latest`: HTTP 200, có nhận xét, lý do theo bối cảnh Văn Miếu và cấu hình đầy đủ để áp dụng. Chưa kiểm tra upload ảnh với Google thật, Docker hoặc workflow CI trên GitHub.
 
 ## Tự động
+
+Để bắt lỗi cuộn xuất hiện sau khi route dev tải xong, chạy `PLAYWRIGHT_DEV=1 npm run test:e2e -- --grep 'page links open'`. Ca này bật animation bình thường và theo dõi vị trí cuộn thêm 1,5 giây sau chuyển trang trên desktop/mobile. `data-scroll-behavior="smooth"` trên `html` cho phép Next.js tạm tắt cuộn mượt trong chuyển route; thiếu thuộc tính này đã tái hiện cuộn muộn hơn 1.100px trên dev dù production qua.
+
+Sau khi thay phông ảnh bằng minh họa AI phong cách 3D: production build và lint qua; chạy lại hai ca `Hanoi backdrops` và `broken backdrop` đều qua. Đã xem lại ảnh desktop/mobile với phông mới, cập nhật ảnh demo trong README.
 
 ```bash
 npm ci
