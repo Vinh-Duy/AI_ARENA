@@ -1,28 +1,43 @@
 {
   "name": "viets-vibe",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "playwright test",
+    "format": "prettier --write app tests scripts playwright.config.ts next.config.ts README.md docs",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check:content": "node scripts/audit-content.mjs",
+    "check": "npm run lint && npm run typecheck && npm run check:content",
+    "format:check": "prettier --check app tests scripts playwright.config.ts next.config.ts README.md docs"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",
+    "framer-motion": "^13.4.0",
+    "lucide-react": "^1.47.0",
     "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-pageflip": "^2.0.3"
+    "react-pageflip": "^2.0.3",
+    "three": "^0.186.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.186.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "prettier": "^3.9.8",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22.0.0 <25"
   }
 }
