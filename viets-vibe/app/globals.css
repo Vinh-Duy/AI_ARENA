@@ -1,9 +1,172 @@
 @import "tailwindcss";
+.backdrop-picker {
+  margin-bottom: 18px;
+}
+.backdrop-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.backdrop-heading > span:last-child {
+  font-size: 10px;
+  color: #738171;
+}
+.backdrop-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.backdrop-options button {
+  text-align: left;
+  padding: 5px;
+  border: 1px solid #d8dfd3;
+  background: #fffdf6;
+  border-radius: 6px;
+  color: #687462;
+}
+.backdrop-options button[aria-pressed="true"] {
+  border-color: #2b6848;
+  background: #e6f0e5;
+  color: #24573c;
+  box-shadow: 0 0 0 1px #2b6848;
+}
+.backdrop-thumb {
+  position: relative;
+  height: 63px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #e7ebdf;
+  border-radius: 3px;
+}
+.backdrop-options button > span:last-child {
+  display: block;
+  font-size: 11px;
+  margin: 7px 3px 3px;
+}
+.backdrop-picker > p {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #76816b;
+}
+.on-location .stage-heading {
+  padding: 12px 16px;
+  background: #fafaf0ed;
+  border-radius: 5px;
+}
+.on-location .stage-badge,
+.on-location .stage-hint {
+  background: #fafaf0ec;
+}
+.on-location .stage-hint {
+  bottom: 0;
+  padding: 7px;
+}
+.on-location .stage-watermark {
+  color: #ffffffaa;
+}
+.reference-note a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.stylist-goal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: #365c42;
+  margin: 20px 0;
+}
+.stylist-goal textarea {
+  resize: vertical;
+  width: 100%;
+  min-height: 85px;
+  padding: 12px;
+  background: #f4f7ef;
+  border: 1px solid #d3dfcd;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #36472f;
+}
+.stylist-proposal {
+  margin-top: 22px;
+  padding: 25px;
+  background: #eaf1e5;
+  border: 1px solid #cbdcc4;
+  border-radius: 7px;
+}
+.stylist-proposal .eyebrow {
+  color: #39734f;
+}
+.stylist-proposal h2 {
+  margin: 12px 0;
+  font-size: 32px;
+  color: #254c34;
+}
+.stylist-proposal p {
+  font-size: 12px;
+  line-height: 1.9;
+  margin-bottom: 12px;
+  color: #56674d;
+}
+.proposal-palette {
+  display: flex;
+  margin: 16px 0 12px;
+}
+.proposal-palette i {
+  height: 35px;
+  width: 45px;
+  border: 1px solid #ffffff70;
+}
+.proposal-palette i:first-child {
+  border-radius: 5px 0 0 5px;
+}
+.proposal-palette i:last-child {
+  border-radius: 0 5px 5px 0;
+}
+.proposal-summary {
+  font-weight: 500;
+}
+@media (max-width: 700px) {
+  .studio-layout > .studio-result > .backdrop-picker {
+    order: -4;
+    width: 100%;
+  }
+  .backdrop-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .backdrop-options {
+    gap: 6px;
+  }
+  .backdrop-thumb {
+    height: 48px;
+  }
+  .backdrop-options button > span:last-child {
+    font-size: 9px;
+  }
+  .on-location .stage-heading {
+    padding: 0;
+    background: transparent;
+  }
+  .stylist-proposal {
+    padding: 20px;
+  }
+  .stylist-proposal h2 {
+    font-size: 28px;
+  }
+}
 :root {
   --background: #f8f6f0;
   --foreground: #282a24;
   --muted: #797a70;
-  --orange: #bd4d34;
+  --accent: #2b6848;
   --line: #dedfd4;
   --sage: #e9ece2;
 }
@@ -73,11 +236,11 @@ em {
   font-weight: 400;
 }
 ::selection {
-  background: #d9b4a3;
+  background: #c9dfcc;
   color: #26271f;
 }
 :focus-visible {
-  outline: 2px solid var(--orange);
+  outline: 2px solid var(--accent);
   outline-offset: 5px;
 }
 img {
@@ -128,7 +291,7 @@ svg {
 }
 .brand-mark,
 .brand-dot {
-  color: var(--orange);
+  color: var(--accent);
 }
 .desktop-nav {
   display: flex;
@@ -155,7 +318,7 @@ svg {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--orange);
+  background: var(--accent);
 }
 .button {
   display: inline-flex;
@@ -182,19 +345,19 @@ svg {
 .button:hover svg {
   transform: translate(2px, -2px);
 }
-.button-orange {
-  background: var(--orange);
+.button-primary {
+  background: var(--accent);
   color: #fff8ee;
 }
-.button-orange:hover {
-  background: #a93e2a;
+.button-primary:hover {
+  background: #205338;
 }
 .button-dark {
-  background: #30372d;
+  background: #214b35;
   color: #fffdf5;
 }
 .button-dark:hover {
-  background: #464e3c;
+  background: #326448;
 }
 .button-outline {
   border: 1px solid #d6d8cc;
@@ -231,7 +394,7 @@ svg {
   font-weight: 500;
 }
 .text-link:hover {
-  color: var(--orange);
+  color: var(--accent);
 }
 .hero {
   display: grid;
@@ -248,8 +411,8 @@ svg {
   height: 6px;
   width: 6px;
   border-radius: 50%;
-  background: var(--orange);
-  box-shadow: 0 0 0 4px #bd4d3410;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px #2b684810;
   margin-right: 5px;
 }
 .hero h1 {
@@ -260,7 +423,7 @@ svg {
   margin: 29px 0 23px;
 }
 .hero h1 em {
-  color: var(--orange);
+  color: var(--accent);
 }
 .title-spark {
   position: absolute;
@@ -303,9 +466,7 @@ svg {
 }
 .gemini-symbol {
   font-size: 24px;
-  background: linear-gradient(20deg, #547bba, #9278b1, #be5d62);
-  color: transparent;
-  background-clip: text;
+  color: var(--accent);
 }
 .tiny-divider {
   height: 13px;
@@ -631,7 +792,7 @@ svg {
 }
 .garment-card:hover .card-arrow,
 .saved-image:hover .card-arrow {
-  background: var(--orange);
+  background: var(--accent);
   transform: rotate(45deg);
 }
 .garment-title {
@@ -782,7 +943,7 @@ svg {
   padding-block: 102px 90px;
 }
 .manifesto > .eyebrow {
-  color: var(--orange);
+  color: var(--accent);
 }
 .manifesto h2 {
   font-size: clamp(36px, 4.1vw, 59px);
@@ -819,7 +980,7 @@ svg {
   font-size: 10px;
 }
 .closing {
-  background: #b94b33;
+  background: #286443;
   text-align: center;
   color: #fff0dd;
   padding: 58px 25px 52px;
@@ -899,7 +1060,7 @@ svg {
   margin: 11px 0;
 }
 .studio-heading h1 em {
-  color: var(--orange);
+  color: var(--accent);
 }
 .studio-heading p {
   font-size: 12px;
@@ -986,9 +1147,9 @@ svg {
   object-position: 40% 30%;
 }
 .garment-option.selected {
-  border-color: var(--orange);
-  background: #f4e8de;
-  color: var(--orange);
+  border-color: var(--accent);
+  background: #e6f0e5;
+  color: var(--accent);
 }
 .garment-option > i {
   position: absolute;
@@ -998,7 +1159,7 @@ svg {
   place-items: center;
   width: 16px;
   height: 16px;
-  background: var(--orange);
+  background: var(--accent);
   color: white;
   border-radius: 50%;
 }
@@ -1127,7 +1288,7 @@ svg {
   color: #6c7662;
 }
 .gemini-button:hover {
-  color: var(--orange);
+  color: var(--accent);
 }
 .result-topline {
   display: flex;
@@ -1504,7 +1665,7 @@ svg {
   margin: 25px 0;
 }
 .credits-page h1 em {
-  color: var(--orange);
+  color: var(--accent);
 }
 .credits-page > p,
 .credits-page article p {
@@ -1526,7 +1687,7 @@ svg {
 }
 .credits-page article a {
   font-size: 11px;
-  color: var(--orange);
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 5px;
 }
@@ -2564,7 +2725,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--orange);
+  color: var(--accent);
 }
 .collection-bottom {
   display: flex;
@@ -2593,7 +2754,7 @@ svg {
   gap: 4px;
 }
 .footer-links a:hover {
-  color: var(--orange);
+  color: var(--accent);
 }
 .library-page {
   padding-block: 65px 75px;
@@ -2614,7 +2775,7 @@ svg {
 }
 .library-intro h1 em,
 .about-intro h1 em {
-  color: var(--orange);
+  color: var(--accent);
 }
 .library-intro p,
 .about-intro > p {
@@ -2672,7 +2833,7 @@ svg {
   color: var(--foreground);
 }
 .search-box:focus-within {
-  outline: 2px solid var(--orange);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 .search-box button {
@@ -3000,7 +3161,7 @@ svg {
   text-align: center;
 }
 .error-page > svg {
-  color: var(--orange);
+  color: var(--accent);
   margin-bottom: 20px;
 }
 .error-page h1 {
@@ -3010,7 +3171,7 @@ svg {
   margin: 25px 0;
 }
 .error-page h1 em {
-  color: var(--orange);
+  color: var(--accent);
 }
 .error-page p {
   font-size: 13px;
@@ -3022,7 +3183,7 @@ svg {
   display: block;
   font-size: 40px;
   margin-bottom: 20px;
-  color: var(--orange);
+  color: var(--accent);
   animation: spin 8s linear infinite;
 }
 .backup-actions {
@@ -3134,12 +3295,12 @@ svg {
 }
 .undo-message button {
   background: transparent;
-  color: var(--orange);
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .credits-page > p a {
-  color: var(--orange);
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -3455,7 +3616,7 @@ svg {
 .height-control input {
   grid-column: 1 / -1;
   width: 100%;
-  accent-color: #b95035;
+  accent-color: #2b6848;
 }
 .skin-control {
   grid-column: 1 / -1;
