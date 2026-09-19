@@ -1,195 +1,711 @@
 "use client";
-
-import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { AvatarControls } from "../components/avatar-controls";
+import type { AvatarHandle } from "../components/avatar-canvas";
 import {
-  ArrowLeft,
+  avatarFromQuery,
+  defaultAvatar,
+  culturalChecks,
+  paletteHarmony,
+} from "../lib/avatar";
+const AvatarCanvas = dynamic(() => import("../components/avatar-canvas"), {
+  ssr: false,
+  loading: () => <div className="avatar-loading">Đang tải phòng thử 3D…</div>,
+});
+import Image from "next/image";
+import {
   ArrowUpRight,
-  AlertTriangle,
+  Bookmark,
+  Check,
   ChevronDown,
-  Flower2,
   ImagePlus,
+  LoaderCircle,
+  Plus,
+  RotateCcw,
+  Share2,
+  ShieldCheck,
   Sparkles,
-  Upload,
+  X,
 } from "lucide-react";
+import { Header, Footer, Reveal } from "../components/site";
+import {
+  accessories,
+  colors,
+  garments,
+  occasions,
+  vibes,
+  type StyleSuggestion,
+  type SavedLook,
+} from "../lib/heritage";
+import { readLooks, writeLooks } from "../lib/lookbook";
 
-const occasions = ["Lễ Hội", "Dạo phố", "Sự kiện hiện đại", "Tết"];
-const heritagePalette = [
-  { name: "Ngọc bích", color: "#315747" },
-  { name: "Son đỏ", color: "#8c3f35" },
-  { name: "Mật ong", color: "#d4ad63" },
-  { name: "Ngà cổ", color: "#f1e4c5" },
-];
-const maxUploadBytes = 7 * 1024 * 1024;
-
-type StyleSuggestion = {
-  "tên_trang_phục": string;
-  "nguồn_gốc": string;
-  "gợi_ý_phối": string[];
-  "cảnh_báo_văn_hóa": string;
-};
-
-function fileToBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("Không thể đọc ảnh."));
-    reader.readAsDataURL(file);
-  });
-}
-
-export default function MixMatchPage() {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [occasion, setOccasion] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+function Studio() {
+  const params = useSearchParams();
+  const [avatar, setAvatar] = useState(() =>
+    avatarFromQuery(params.get("avatar")),
+  );
+  const avatarRef = useRef<AvatarHandle>(null);
+  const [controlTab, setControlTab] = useState("outfit");
+  const [garmentId, setGarmentId] = useState(
+    () => garments.find((g) => g.id === params.get("garment"))?.id || "ao-dai",
+  );
+  const [colorName, setColorName] = useState(
+    () =>
+      colors.find((c) => c.name === params.get("color"))?.name || "Ngọc bích",
+  );
+  const [occasion, setOccasion] = useState(
+    () => occasions.find((o) => o === params.get("occasion")) || "Dạo phố",
+  );
+  const [vibe, setVibe] = useState(
+    () => vibes.find((v) => v === params.get("vibe")) || "Thanh lịch",
+  );
+  const [extras, setExtras] = useState<string[]>(() =>
+    params.has("extras")
+      ? accessories.filter((a) => params.get("extras")?.split(",").includes(a))
+      : ["Quạt giấy"],
+  );
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
   const [result, setResult] = useState<StyleSuggestion | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const previewUrlRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-    };
-  }, []);
-
-  function handleFile(file?: File) {
-    if (file && file.size > maxUploadBytes) {
-      setErrorMessage("Ảnh cần nhỏ hơn 7 MB để có thể phối đồ.");
+  const [busy, setBusy] = useState(false);
+  const [resultSource, setResultSource] = useState("BẢN PHỐI GỢI Ý");
+  const [message, setMessage] = useState("");
+  const [saved, setSaved] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const garment = garments.find((g) => g.id === garmentId)!;
+  const color = colors.find((c) => c.name === colorName)!;
+  const warnings = culturalChecks(garmentId, occasion, avatar);
+  const harmony = paletteHarmony([
+    color.hex,
+    avatar.inner,
+    avatar.bottom,
+    avatar.accent,
+  ]);
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview],
+  );
+  function changed() {
+    setResult(null);
+    setSaved(false);
+    setMessage("");
+  }
+  function upload(f?: File) {
+    if (!f) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) {
+      setMessage("Chọn ảnh JPG, PNG hoặc WebP nhé.");
       return;
     }
-
-    if (file?.type.startsWith("image/")) {
-      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-      const objectUrl = URL.createObjectURL(file);
-      previewUrlRef.current = objectUrl;
-      setSelectedImage(file);
-      setImagePreview(objectUrl);
-      setResult(null);
-      setErrorMessage(null);
+    if (f.size > 5 * 1024 * 1024) {
+      setMessage("Ảnh cần nhỏ hơn 5 MB.");
+      return;
     }
+    setPreview(URL.createObjectURL(f));
+    setFile(f);
+    changed();
   }
-
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    handleFile(event.target.files?.[0]);
+  function compose() {
+    const vibeTip: Record<string, string> = {
+      "Thanh lịch":
+        "Chọn giày bệt hoặc loafer trơn, ưu tiên đường nét gọn và phụ kiện nhỏ.",
+      "Tối giản":
+        "Giữ tổng thể ở hai đến ba màu, chọn quần trơn và hạn chế họa tiết bổ sung.",
+      "Nàng thơ":
+        "Dùng sắc ngà ở lớp trang phục đi kèm và chọn chi tiết mềm mại để tạo cảm giác nhẹ nhàng.",
+      "Cá tính":
+        "Thử giày sneaker tối giản trong bối cảnh đời thường; giữ phom áo làm điểm nhấn chính.",
+    };
+    const eventTip: Record<string, string> = {
+      "Dạo phố":
+        "Ưu tiên vải nhẹ, giày dễ đi và kiểm tra độ dài tà áo khi di chuyển.",
+      "Chụp kỷ yếu":
+        "Chọn phụ kiện nhỏ, thống nhất tông màu với nhóm và thử dáng áo trước buổi chụp.",
+      "Lễ hội":
+        "Chọn giày thoải mái, phụ kiện gọn và tìm hiểu quy định trang phục tại nơi tổ chức.",
+      Tết: "Phối một điểm nhấn ấm như đỏ son hoặc vàng nhạt; chọn phom thoải mái cho những buổi thăm hỏi.",
+      "Dự lễ trang trọng":
+        "Ưu tiên phần thân dưới kín đáo, giày gọn và cách mặc chỉnh tề; hỏi đơn vị tổ chức về quy cách lễ phục.",
+    };
+    setResult({
+      tên_trang_phục: `${garment.name} · ${vibe.toLowerCase()}`,
+      nguồn_gốc: garment.story,
+      gợi_ý_phối: [
+        `Lấy ${colorName.toLowerCase()} làm màu chủ đạo; dùng bảng màu từng lớp bạn đã chọn để cân bằng tổng thể.`,
+        `${garment.stylingTip} Bản hiện tại dùng ${avatar.bottomType === "skirt" ? "váy dài" : "quần dài"} và ${avatar.footwear === "sneakers" ? "sneaker" : "giày bệt"}. ${vibeTip[vibe]}`,
+        extras.length
+          ? `Điểm xuyết ${extras.join(", ").toLowerCase()}; chọn một món làm điểm nhấn để tổng thể không quá nhiều chi tiết.`
+          : "Giữ bản phối tinh giản, để chất liệu và phom áo tự tạo điểm nhấn.",
+        eventTip[occasion],
+      ],
+      cảnh_báo_văn_hóa: [garment.note, ...warnings.map((w) => w.text)].join(
+        " ",
+      ),
+    });
+    setResultSource("BẢN PHỐI THEO LỰA CHỌN");
+    setMessage("");
+    setSaved(false);
   }
-
-  function handleDrop(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-    handleFile(event.dataTransfer.files[0]);
-  }
-
-  async function handleGenerate() {
-    setIsGenerating(true);
-    setResult(null);
-    setErrorMessage(null);
-
+  async function askGemini() {
+    setBusy(true);
+    setMessage("");
     try {
-      const imageBase64 = selectedImage ? await fileToBase64(selectedImage) : undefined;
+      let imageBase64: string | undefined;
+      if (file)
+        imageBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = () => reject(new Error("Không đọc được ảnh."));
+          reader.readAsDataURL(file);
+        });
       const response = await fetch("/api/style", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(60000),
         body: JSON.stringify({
           occasion,
+          garment: garment.name,
+          color: colorName,
+          vibe,
+          accessories: extras,
           imageBase64,
-          mimeType: selectedImage?.type,
-          imageDescription: selectedImage ? undefined : `Người dùng muốn phối đồ cho dịp ${occasion}.`,
+          mimeType: file?.type,
+          imageDescription: `Mockup 3D: lớp dưới ${avatar.bottomType}, giày ${avatar.footwear}, màu trong ${avatar.inner}, màu dưới ${avatar.bottom}, màu phụ kiện ${avatar.accent}, giữ cổ áo ${avatar.collar}. Lưu ý: ${warnings.map((w) => w.title).join("; ")}.`,
         }),
       });
-      const payload = (await response.json()) as { suggestion?: StyleSuggestion; error?: string };
-      if (!response.ok || !payload.suggestion) throw new Error(payload.error || "Không thể tạo gợi ý.");
-      setResult(payload.suggestion);
+      const data = await response.json();
+      if (!response.ok || !data.suggestion)
+        throw new Error(
+          data.error || "Chưa thể kết nối stylist. Bạn thử lại nhé.",
+        );
+      setResult(data.suggestion);
+      setResultSource("GỢI Ý TỪ GOOGLE GEMINI");
+      setSaved(false);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Không thể tạo gợi ý lúc này.");
+      setMessage(
+        error instanceof Error && error.name === "TimeoutError"
+          ? "Gemini đang phản hồi lâu hơn thường lệ. Bạn có thể thử lại hoặc tạo bản phối theo lựa chọn."
+          : error instanceof Error
+            ? error.message
+            : "Chưa thể kết nối stylist.",
+      );
     } finally {
-      setIsGenerating(false);
+      setBusy(false);
     }
   }
-
-  const canGenerate = Boolean(selectedImage || occasion);
-
+  function save() {
+    try {
+      const looks = readLooks();
+      const look: SavedLook = {
+        id: crypto.randomUUID(),
+        garment: garmentId,
+        color: colorName,
+        occasion,
+        vibe,
+        accessories: extras,
+        avatar,
+        thumbnail: avatarRef.current?.thumbnail(),
+        ...(result ? { result } : {}),
+      };
+      writeLooks([look, ...looks].slice(0, 30));
+      setSaved(true);
+      setMessage("Đã lưu vào lookbook trên thiết bị này.");
+    } catch {
+      setMessage(
+        "Trình duyệt chưa cho phép lưu. Bạn vẫn có thể chia sẻ đường dẫn bản phối.",
+      );
+    }
+  }
+  async function share() {
+    const query = new URLSearchParams({
+      garment: garmentId,
+      color: colorName,
+      occasion,
+      vibe,
+      extras: extras.join(","),
+      avatar: JSON.stringify(avatar),
+    });
+    const url = `${location.origin}/mix-match?${query}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setMessage(
+        "Đã sao chép liên kết các lựa chọn phối đồ. Ảnh cá nhân không được chia sẻ.",
+      );
+    } catch {
+      setMessage(`Liên kết bản phối: ${url}`);
+    }
+  }
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#101a16] text-[#f5ecd8]">
-      <div className="grain pointer-events-none absolute inset-0 z-20" />
-      <header className="relative z-30 flex h-20 items-center justify-between border-b border-[#f3ead7]/10 px-6 md:px-12 lg:px-16">
-        <Link href="/" className="group flex items-center gap-3" aria-label="Về trang chủ">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d4ad63]/60 text-[#d4ad63] transition-colors group-hover:bg-[#d4ad63] group-hover:text-[#101a16]"><Sparkles size={15} strokeWidth={1.5} /></span>
-          <span className="font-display text-xl tracking-wide">VIET&apos;S VIBE</span>
-        </Link>
-        <Link href="/" className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#b9b49d] transition-colors hover:text-[#f5ecd8]"><ArrowLeft size={15} strokeWidth={1.5} /> Về trang chủ</Link>
-      </header>
-
-      <div className="relative z-10 mx-auto grid max-w-[1500px] gap-0 lg:min-h-[calc(100vh-5rem)] lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-        <section className="glass-card border-b border-[#f3ead7]/10 px-7 py-14 md:px-14 lg:border-b-0 lg:border-r lg:px-20 lg:py-20">
-          <div className="mb-10 max-w-lg">
-            <p className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d4ad63]"><span className="h-px w-10 bg-[#d4ad63]" />01 / Bắt đầu</p>
-            <h1 className="font-editorial text-6xl leading-[0.88] tracking-[-0.03em] md:text-7xl">Phối đồ<br /><em className="font-normal text-[#d4ad63]">theo</em> chất riêng.</h1>
-            <p className="mt-6 max-w-sm text-sm leading-6 text-[#b9b49d]">Đưa một món đồ bạn yêu thích vào đây. Chúng tôi sẽ tìm nhịp điệu phù hợp cho dịp sắp tới.</p>
+    <>
+      <Header active="studio" />
+      <main className="studio-page section-wrap">
+        <Reveal>
+          <div className="studio-heading">
+            <div>
+              <span className="eyebrow">THE REMIX STUDIO / 3D</span>
+              <h1>
+                Hôm nay, bạn <em>mặc gì?</em>
+              </h1>
+              <p>Chọn dáng người. Khoác nếp áo. Xoay để thấy chất riêng.</p>
+            </div>
+            <span className="powered-pill">
+              <span className="gemini-symbol">✦</span> Cùng Google Gemini
+            </span>
           </div>
-
-          <label
-            htmlFor="clothing-upload"
-            onDragEnter={() => setIsDragging(true)}
-            onDragOver={(event) => event.preventDefault()}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-            className={`glass-card-hover group relative flex aspect-[1.7/1] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-sm border transition-colors ${isDragging ? "border-[#d4ad63] bg-[#d4ad63]/10" : "border-dashed border-[#f5ecd8]/25 bg-[#243d32]/35 hover:border-[#d4ad63]/70"}`}
+        </Reveal>
+        <nav className="mobile-studio-jump" aria-label="Di chuyển trong studio">
+          <a href="#studio-canvas">Xem mô hình 3D ↑</a>
+          <a href="#studio-controls">Chọn & chỉnh đồ ↓</a>
+        </nav>
+        <div className="studio-layout">
+          <section
+            id="studio-controls"
+            className="studio-controls"
+            aria-label="Tùy chỉnh bản phối"
           >
-            {imagePreview ? (
-              <>
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg, rgba(24,14,13,0.08), rgba(24,14,13,0.8)), url(${imagePreview})` }} />
-                <div className="relative z-10 text-center"><ImagePlus className="mx-auto mb-3 text-[#d9a95b]" size={25} strokeWidth={1.4} /><p className="text-sm text-[#f3ead7]">{selectedImage?.name}</p><p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#d9a95b]">Thay đổi ảnh</p></div>
-              </>
-            ) : (
-              <div className="relative z-10 flex flex-col items-center text-center"><span className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-[#d9a95b]/40 text-[#d9a95b] transition-transform duration-500 group-hover:-translate-y-1"><Upload size={20} strokeWidth={1.4} /></span><p className="font-editorial text-2xl italic text-[#f3ead7]">Thả món đồ vào đây</p><p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#806c62]">hoặc chạm để chọn ảnh</p></div>
+            <fieldset disabled={busy}>
+              <div
+                className="studio-control-tabs"
+                role="group"
+                aria-label="Nhóm tùy chỉnh"
+              >
+                <button
+                  aria-pressed={controlTab === "outfit"}
+                  onClick={() => setControlTab("outfit")}
+                >
+                  Trang phục
+                </button>
+                <button
+                  aria-pressed={controlTab === "avatar"}
+                  onClick={() => setControlTab("avatar")}
+                >
+                  Người mẫu & lớp
+                </button>
+              </div>
+              <div hidden={controlTab !== "avatar"}>
+                {" "}
+                <AvatarControls
+                  value={avatar}
+                  onChange={(next) => {
+                    setAvatar(next);
+                    changed();
+                  }}
+                />
+              </div>
+              <div hidden={controlTab !== "outfit"}>
+                <div className="control-group">
+                  <span className="control-label">
+                    <b>01</b> Bắt đầu từ một nếp áo
+                  </span>
+                  <div className="garment-options">
+                    {garments.map((g) => (
+                      <button
+                        key={g.id}
+                        className={
+                          g.id === garmentId
+                            ? "garment-option selected"
+                            : "garment-option"
+                        }
+                        aria-pressed={g.id === garmentId}
+                        onClick={() => {
+                          setGarmentId(g.id);
+                          changed();
+                        }}
+                      >
+                        <span>
+                          <Image src={g.image} alt="" fill sizes="90px" />
+                        </span>
+                        {g.name}
+                        {g.id === garmentId && (
+                          <i>
+                            <Check size={11} />
+                          </i>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="control-group">
+                  <label className="control-label" htmlFor="occasion">
+                    <b>02</b> Bạn sẽ đi đâu?
+                  </label>
+                  <div className="select-wrap">
+                    <select
+                      id="occasion"
+                      value={occasion}
+                      onChange={(e) => {
+                        setOccasion(e.target.value);
+                        changed();
+                      }}
+                    >
+                      {occasions.map((o) => (
+                        <option key={o}>{o}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
+                <div className="control-group">
+                  <span className="control-label">
+                    <b>03</b> Một sắc màu rất bạn <small>{colorName}</small>
+                  </span>
+                  <div className="color-options">
+                    {colors.map((c) => (
+                      <button
+                        key={c.name}
+                        title={c.name}
+                        aria-label={c.name}
+                        aria-pressed={c.name === colorName}
+                        className={
+                          c.name === colorName
+                            ? "color-option selected"
+                            : "color-option"
+                        }
+                        onClick={() => {
+                          setColorName(c.name);
+                          changed();
+                        }}
+                      >
+                        <span style={{ backgroundColor: c.hex }}>
+                          {c.name === colorName && <Check size={18} />}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="control-group">
+                  <span className="control-label">
+                    <b>04</b> Chọn chất riêng
+                  </span>
+                  <div className="choice-chips">
+                    {vibes.map((v) => (
+                      <button
+                        key={v}
+                        aria-pressed={v === vibe}
+                        className={v === vibe ? "selected" : ""}
+                        onClick={() => {
+                          setVibe(v);
+                          changed();
+                        }}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="control-group">
+                  <span className="control-label">
+                    <b>05</b> Thêm chút điểm nhấn <small>Tùy chọn</small>
+                  </span>
+                  <div className="choice-chips accessories">
+                    {accessories.map((a) => (
+                      <button
+                        key={a}
+                        aria-pressed={extras.includes(a)}
+                        className={extras.includes(a) ? "selected" : ""}
+                        onClick={() => {
+                          setExtras(
+                            extras.includes(a)
+                              ? extras.filter((x) => x !== a)
+                              : [...extras, a],
+                          );
+                          changed();
+                        }}
+                      >
+                        {extras.includes(a) ? (
+                          <Check size={13} />
+                        ) : (
+                          <Plus size={13} />
+                        )}
+                        {a}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div
+                className="upload-area"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (!busy) upload(e.dataTransfer.files[0]);
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => fileInput.current?.click()}
+                >
+                  <ImagePlus size={20} />
+                  <span>
+                    {file ? file.name : "Thêm ảnh món đồ của bạn"}
+                    <small>JPG, PNG, WebP · tối đa 5 MB</small>
+                  </span>
+                </button>
+                {file && (
+                  <button
+                    className="icon-button"
+                    aria-label="Xóa ảnh"
+                    onClick={() => {
+                      setFile(null);
+                      setPreview("");
+                      changed();
+                    }}
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  aria-label="Tải ảnh món đồ"
+                  className="sr-only"
+                  onChange={(e) => {
+                    upload(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </div>
+              <p className="upload-note">
+                Ảnh chỉ gửi tới Google khi bạn chọn gợi ý từ Gemini.
+              </p>
+              <button
+                className="button button-orange full-button"
+                onClick={compose}
+              >
+                Tạo bản phối của tôi <ArrowUpRight size={18} />
+              </button>
+              <button
+                className="gemini-button"
+                onClick={askGemini}
+                disabled={busy}
+              >
+                {busy ? (
+                  <LoaderCircle size={18} className="spin" />
+                ) : (
+                  <Sparkles size={17} />
+                )}
+                {busy
+                  ? "Gemini đang tìm cảm hứng…"
+                  : "Gợi ý sâu hơn cùng Gemini"}
+              </button>
+            </fieldset>
+          </section>
+          <section
+            className="studio-result"
+            aria-label="Bản phối của bạn"
+            aria-busy={busy}
+          >
+            <div className="result-topline">
+              <span>YOUR PERSONAL EDIT</span>
+              <button
+                className="text-link"
+                disabled={busy}
+                onClick={() => {
+                  setAvatar({ ...defaultAvatar });
+                  setGarmentId("ao-dai");
+                  setColorName("Ngọc bích");
+                  setOccasion("Dạo phố");
+                  setVibe("Thanh lịch");
+                  setExtras(["Quạt giấy"]);
+                  setFile(null);
+                  setPreview("");
+                  changed();
+                }}
+              >
+                <RotateCcw size={13} /> Làm mới
+              </button>
+            </div>
+            <div className="canvas-anchor" id="studio-canvas" />
+            <AvatarCanvas
+              ref={avatarRef}
+              garment={garmentId}
+              color={color.hex}
+              extras={extras}
+              avatar={avatar}
+            />
+            <div className="palette-insight">
+              <div>
+                {[
+                  color.hex,
+                  avatar.inner,
+                  avatar.bottom,
+                  avatar.accent,
+                  avatar.shoes,
+                ].map((hex, i) => (
+                  <i key={i} style={{ background: hex }} />
+                ))}
+              </div>
+              <p>
+                <b>{harmony}</b>
+                <span>
+                  Gợi ý theo khoảng cách sắc màu, không phải điểm đánh giá thẩm
+                  mỹ.
+                </span>
+              </p>
+            </div>
+            <div
+              className="live-culture"
+              aria-live="polite"
+              aria-label="Lưu ý văn hóa theo bản phối"
+            >
+              {warnings.length ? (
+                warnings.map((warning) => (
+                  <div className="cultural-warning" key={warning.title}>
+                    <ShieldCheck size={18} />
+                    <div>
+                      <strong>{warning.title}</strong>
+                      <p>{warning.text}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="culture-clear">
+                  <ShieldCheck size={17} /> Chưa có lưu ý bổ sung từ các quy tắc
+                  của demo. Xem tư liệu cho bối cảnh sử dụng.
+                </p>
+              )}
+            </div>
+            <details className="reference-drawer">
+              <summary>
+                Đối chiếu ảnh thật & nguồn gốc <Plus size={16} />
+              </summary>
+              <div className="reference-content">
+                <div className="reference-photo">
+                  <Image
+                    src={garment.image}
+                    alt={`Ảnh tham khảo ${garment.name}`}
+                    fill
+                    sizes="180px"
+                    style={{ objectPosition: garment.objectPosition }}
+                  />
+                </div>
+                <div>
+                  <span className="eyebrow">
+                    {garment.region} / {garment.name}
+                  </span>
+                  <p>{garment.story}</p>
+                  <a
+                    className="text-link"
+                    href={garment.source}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {garment.sourceName} ↗
+                  </a>
+                </div>
+              </div>
+            </details>
+            {preview && (
+              <div className="upload-preview-row">
+                <div className="user-photo">
+                  <Image
+                    src={preview}
+                    alt="Món đồ bạn tải lên"
+                    fill
+                    unoptimized
+                    sizes="100px"
+                  />
+                </div>
+                <p>Ảnh tham khảo cho Gemini; chưa chuyển thành vật thể 3D.</p>
+              </div>
             )}
-            <input id="clothing-upload" type="file" accept="image/*" onChange={handleFileChange} className="sr-only" />
-          </label>
-
-          <div className="my-8 flex items-center gap-4 text-[10px] uppercase tracking-[0.25em] text-[#87937d]"><span className="h-px flex-1 bg-[#f5ecd8]/10" />hoặc chọn dịp<span className="h-px flex-1 bg-[#f5ecd8]/10" /></div>
-          <div className="relative">
-            <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#87937d]">Chọn bối cảnh để AI hiểu nhịp điệu bạn muốn</p>
-            <select aria-label="Chọn dịp phối đồ" value={occasion} onChange={(event) => { setOccasion(event.target.value); setResult(null); setErrorMessage(null); }} className="w-full appearance-none border border-[#f5ecd8]/20 bg-[#243d32]/45 px-5 py-4 text-sm text-[#f5ecd8] outline-none transition-colors focus:border-[#d4ad63]">
-              <option value="" disabled>Chọn một dịp đặc biệt</option>
-              {occasions.map((item) => <option key={item} value={item}>{item}</option>)}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-[#d9a95b]" size={17} strokeWidth={1.5} />
-          </div>
-
-          <motion.button type="button" aria-label="Phối đồ ngay" onClick={handleGenerate} disabled={!canGenerate || isGenerating} whileHover={canGenerate ? { scale: 1.015, backgroundColor: "#e1bd75" } : undefined} whileTap={canGenerate ? { scale: 0.985 } : undefined} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }} className="mt-10 flex w-full items-center justify-between border border-[#d4ad63] bg-[#d4ad63] px-7 py-5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#18231c] transition-opacity duration-700 disabled:cursor-not-allowed disabled:opacity-35">
-            <span>{isGenerating ? "Đang dệt nên diện mạo..." : "Generate Look · Phối Đồ Ngay"}</span>
-            {isGenerating ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1.3, repeat: Infinity, ease: "linear" }}><Flower2 size={19} strokeWidth={1.4} /></motion.span> : <ArrowUpRight size={18} strokeWidth={1.5} />}
-          </motion.button>
-        </section>
-
-        <section aria-live="polite" aria-busy={isGenerating} className="glass-card relative flex min-h-[560px] flex-col justify-between overflow-hidden px-7 py-14 transition-colors duration-1000 md:px-14 lg:min-h-0 lg:px-20 lg:py-20">
-          <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full border border-[#d9a95b]/10" />
-          <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full border border-[#d9a95b]/10" />
-          <div className="relative z-10 flex items-start justify-between"><div><p className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d9a95b]"><span className="h-px w-10 bg-[#d9a95b]" />02 / Lookbook</p><h2 className="font-display text-5xl leading-none md:text-6xl">Gợi ý<br /><em className="font-editorial font-normal text-[#d9a95b]">của bạn.</em></h2></div><span className="font-editorial text-4xl italic text-[#d9a95b]/50">V.V</span></div>
-
-          <div className="relative z-10 flex flex-1 items-center justify-center py-16">
-            {isGenerating ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-6 text-center"><motion.div animate={{ rotate: 360, scale: [1, 1.08, 1] }} transition={{ rotate: { duration: 2.4, repeat: Infinity, ease: "linear" }, scale: { duration: 1.4, repeat: Infinity, ease: "easeInOut" } }} className="flex h-24 w-24 items-center justify-center rounded-[44%_56%_52%_48%/48%_44%_56%_52%] border border-[#d9a95b] text-[#d9a95b]"><Flower2 size={34} strokeWidth={1} /></motion.div><p className="font-editorial text-2xl italic text-[#f3ead7]">Đang tìm cảm hứng...</p><p className="max-w-xs text-xs leading-5 text-[#806c62]">Những đường nét phù hợp đang được kết nối.</p></motion.div>
-            ) : result ? (
-                <motion.div layout aria-label="Lookbook Card" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }} className="glass-card w-full max-w-lg rounded-sm p-7 [will-change:transform,opacity] md:p-9">
-                  <div className="mb-8 flex items-start justify-between gap-5"><div><p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-[#d4ad63]">Bản phối đã thành hình</p><h3 className="font-editorial text-3xl italic leading-tight text-[#f5ecd8]">{result["tên_trang_phục"]}</h3><p className="mt-3 text-xs text-[#b9b49d]">{result["nguồn_gốc"]}</p></div><Sparkles className="mt-1 shrink-0 text-[#d4ad63]" size={21} strokeWidth={1.2} /></div>
-                  <div className="mb-7 border-t border-[#f5ecd8]/10 pt-6"><p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#d4ad63]">Bảng màu cảm hứng</p><div className="flex gap-5">{heritagePalette.map((swatch) => <div key={swatch.name} className="flex flex-col items-center gap-2"><span className="h-8 w-8 rounded-full border border-[#f5ecd8]/25 shadow-[0_4px_14px_rgba(0,0,0,0.25)]" style={{ backgroundColor: swatch.color }} /><span className="text-[9px] text-[#87937d]">{swatch.name}</span></div>)}</div></div>
-                  <div className="border-t border-[#f5ecd8]/10 pt-6"><p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#d4ad63]">Gợi ý phối</p><ul className="space-y-4 text-sm leading-6 text-[#d9d5be]">{result["gợi_ý_phối"].map((item) => <li key={item} className="flex gap-3"><span className="mt-3 h-px w-5 shrink-0 bg-[#d4ad63]" />{item}</li>)}</ul></div>
-                  <motion.div role="alert" initial={{ opacity: 0, clipPath: "inset(0 100% 0 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0% 0 0)" }} transition={{ delay: 0.35, duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="mt-8 flex gap-4 border border-[#d66b45]/35 bg-[#6e2b24]/35 p-5 text-xs leading-5 text-[#f3d4bd]"><AlertTriangle className="mt-0.5 shrink-0 text-[#e9a167]" size={18} strokeWidth={1.5} /><p><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e9a167]">Cảnh báo văn hóa</span>{result["cảnh_báo_văn_hóa"]}</p></motion.div>
-                </motion.div>
-            ) : errorMessage ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-sm text-center"><p className="font-editorial text-2xl italic text-[#f3ead7]">Chưa thể dệt nên gợi ý.</p><p className="mt-3 text-xs leading-5 text-[#b6a596]">{errorMessage}</p></motion.div>
-            ) : (
-              <div className="max-w-sm text-center"><div className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-[46%_54%_48%_52%/52%_46%_54%_48%] border border-[#d4ad63]/25 text-[#d4ad63]/70"><Sparkles size={25} strokeWidth={1} /></div><p className="font-editorial text-3xl italic text-[#f5ecd8]">Lookbook Result</p><p className="mt-3 text-xs leading-5 text-[#87937d]">Chọn một món đồ hoặc một dịp để bắt đầu bản phối riêng của bạn.</p><div aria-label="Bảng màu mẫu" className="mt-7 flex justify-center gap-3">{heritagePalette.map((swatch) => <span key={swatch.name} title={swatch.name} className="h-5 w-5 rounded-full border border-[#f5ecd8]/20" style={{ backgroundColor: swatch.color }} />)}</div></div>
+            <Link
+              className="text-link garment-story-link"
+              href={`/heritage/${garment.id}`}
+            >
+              Đọc câu chuyện {garment.name.toLowerCase()}{" "}
+              <ArrowUpRight size={13} />
+            </Link>
+            <p className="reference-note">
+              Ảnh tư liệu dùng để đối chiếu. Ma-nơ-canh là minh họa được dựng
+              riêng cho bản demo.
+            </p>
+            <div className="look-result-copy" aria-live="polite">
+              <span className="eyebrow">
+                {result ? resultSource : "BẢN PHÁC THẢO CỦA BẠN"}
+              </span>
+              <h2>
+                {result
+                  ? result["tên_trang_phục"]
+                  : `${garment.name}, theo cách của bạn.`}
+              </h2>
+              {result ? (
+                <ul className="styling-tips">
+                  {result["gợi_ý_phối"].map((tip, i) => (
+                    <li key={i}>
+                      <span>{String(i + 1).padStart(2, "0")}</span>
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">
+                  Mô hình 3D cập nhật ngay theo lựa chọn. Nhấn “Tạo bản phối của
+                  tôi” để thêm thẻ gợi ý, hoặc lưu ngay mockup vào lookbook.
+                </p>
+              )}
+              <div className="look-actions">
+                <button
+                  className="button button-dark"
+                  onClick={save}
+                  disabled={saved || busy}
+                >
+                  {saved ? <Check size={16} /> : <Bookmark size={16} />}
+                  {saved ? "Đã lưu bản phối" : "Lưu vào lookbook"}
+                </button>
+                <button className="button button-outline" onClick={share}>
+                  <Share2 size={15} /> Chia sẻ
+                </button>
+              </div>
+            </div>
+            {message && (
+              <p role="status" className="status-message">
+                {message}
+              </p>
             )}
-          </div>
-
-          <div className="relative z-10 flex items-center justify-between border-t border-[#f3ead7]/10 pt-5 text-[10px] uppercase tracking-[0.2em] text-[#806c62]"><span>Việt phục / 2026</span><span className="flex items-center gap-2">Chờ cảm hứng <ArrowUpRight size={13} /></span></div>
-        </section>
-      </div>
-    </main>
+            <details className="culture-note" open>
+              <summary>
+                <ShieldCheck size={18} /> Đẹp từ sự thấu hiểu{" "}
+                <ChevronDown size={16} />
+              </summary>
+              <p>{garment.story}</p>
+              <p>{result ? result["cảnh_báo_văn_hóa"] : garment.note}</p>
+              <a href={garment.source} target="_blank" rel="noreferrer">
+                Tìm hiểu thêm · {garment.sourceName} <ArrowUpRight size={13} />
+              </a>
+              {resultSource === "GỢI Ý TỪ GOOGLE GEMINI" && result && (
+                <small>
+                  Gợi ý AI có thể chưa chính xác; đối chiếu nguồn tư liệu khi
+                  dùng trong bối cảnh nghi lễ.
+                </small>
+              )}
+            </details>
+            <Link href="/lookbook" className="text-link view-lookbook">
+              Mở lookbook của bạn <ArrowUpRight size={15} />
+            </Link>
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+export default function MixMatchPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Header active="studio" />
+          <div className="page-loading">Đang mở phòng phối đồ…</div>
+        </>
+      }
+    >
+      <Studio />
+    </Suspense>
   );
 }
