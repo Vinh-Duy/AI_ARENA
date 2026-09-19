@@ -1,9 +1,100 @@
 "use client";
-import { useState, type ReactNode, type MouseEvent } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+  type MouseEvent,
+} from "react";
 import Link from "next/link";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { BrandMark } from "./brand-mark";
 import { motion, MotionConfig } from "framer-motion";
+import {
+  translateText,
+  type Language,
+} from "../lib/i18n";
+
+const LanguageContext = createContext<{
+  language: Language;
+  toggleLanguage: () => void;
+}>({ language: "vi", toggleLanguage: () => undefined });
+
+const textSources = new WeakMap<Text, string>();
+const attributeSources = new WeakMap<HTMLElement, Map<string, string>>();
+
+function translatePage(language: Language) {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes: Text[] = [];
+  let node = walker.nextNode();
+  while (node) {
+    if (node.parentElement && !["SCRIPT", "STYLE"].includes(node.parentElement.tagName)) {
+      nodes.push(node as Text);
+    }
+    node = walker.nextNode();
+  }
+  nodes.forEach((textNode) => {
+    const value = textSources.get(textNode) || textNode.nodeValue || "";
+    textSources.set(textNode, value);
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const translated = translateText(trimmed, language);
+    const nextValue = value.replace(trimmed, translated);
+    if (nextValue !== textNode.nodeValue) {
+      textNode.nodeValue = nextValue;
+    }
+  });
+  document.querySelectorAll<HTMLElement>("body *").forEach((element) => {
+    if (["SCRIPT", "STYLE"].includes(element.tagName)) return;
+    const sources = attributeSources.get(element) || new Map<string, string>();
+    ["aria-label", "placeholder", "title", "alt"].forEach((attribute) => {
+      const current = element.getAttribute(attribute);
+      if (current === null) return;
+      const source = sources.get(attribute) || current;
+      sources.set(attribute, source);
+      const translated = translateText(source, language);
+      if (translated !== current) element.setAttribute(attribute, translated);
+    });
+    attributeSources.set(element, sources);
+  });
+}
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguage] = useState<Language>(() =>
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("viets-vibe-language") === "en"
+      ? "en"
+      : "vi",
+  );
+  function toggleLanguage() {
+    const nextLanguage: Language = language === "vi" ? "en" : "vi";
+    setLanguage(nextLanguage);
+    window.localStorage.setItem("viets-vibe-language", nextLanguage);
+  }
+  useEffect(() => {
+    document.documentElement.lang = language;
+    translatePage(language);
+    const observer = new MutationObserver(() => translatePage(language));
+    observer.observe(document.body, {
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["aria-label", "placeholder", "title", "alt"],
+      subtree: true,
+    });
+    return () => observer.disconnect();
+  }, [language]);
+  return (
+    <LanguageContext.Provider value={{ language, toggleLanguage }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  return useContext(LanguageContext);
+}
 export function Reveal({
   children,
   className = "",
@@ -33,17 +124,7 @@ export function Header({
   active?: "home" | "studio" | "lookbook";
 }) {
   const [open, setOpen] = useState(false);
-  const [language, setLanguage] = useState<"vi" | "en">(() =>
-    typeof window !== "undefined" &&
-    window.localStorage.getItem("viets-vibe-language") === "en"
-      ? "en"
-      : "vi",
-  );
-  function toggleLanguage() {
-    const nextLanguage = language === "vi" ? "en" : "vi";
-    setLanguage(nextLanguage);
-    window.localStorage.setItem("viets-vibe-language", nextLanguage);
-  }
+  const { language, toggleLanguage } = useLanguage();
   function navigate(event: MouseEvent<HTMLAnchorElement>) {
     setOpen(false);
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
