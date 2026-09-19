@@ -63,26 +63,32 @@ test("Hanoi backdrops export and persist with an applicable AI outfit", async ({
               bottomType: "trousers",
               footwear: "flats",
               collar: true,
+              fabric: "brocade",
             },
           },
         },
       },
     });
   });
-  await page.getByRole("button", { name: "Gợi ý sâu hơn cùng Gemini" }).click();
+  await page.getByRole("button", { name: "Phối lại cùng Gemini" }).click();
   await expect(
     page.getByRole("region", { name: "Bản phối stylist đề xuất" }),
   ).toContainText("nền gạch đỏ");
   await expect(
-    page.getByRole("button", { name: "Ngọc bích", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await page
-    .getByRole("button", { name: "Áp dụng bản phối AI", exact: true })
-    .click();
+    page.getByRole("button", { name: "Đã áp dụng bản phối AI", exact: true }),
+  ).toBeDisabled();
+  await expect(page.locator(".avatar-stage")).toHaveAttribute(
+    "data-fabric",
+    "brocade",
+  );
   await expect(
     page.getByRole("button", { name: "Kem lụa", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Trở lại bản phối trước" }).click();
+  await expect(page.locator(".avatar-stage")).toHaveAttribute(
+    "data-fabric",
+    "silk",
+  );
   await expect(
     page.getByRole("button", { name: "Ngọc bích", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -148,7 +154,7 @@ test("broken backdrop and malformed AI plan fail without changing the outfit", a
       },
     }),
   );
-  await page.getByRole("button", { name: "Gợi ý sâu hơn cùng Gemini" }).click();
+  await page.getByRole("button", { name: "Phối lại cùng Gemini" }).click();
   await expect(
     page.getByRole("button", { name: "Áp dụng bản phối AI", exact: true }),
   ).toHaveCount(0);
@@ -296,7 +302,7 @@ test("mobile menu and studio stay within viewport", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Hôm nay",
   );
-  await page.getByRole("button", { name: "Tạo bản phối của tôi" }).click();
+  await page.getByRole("button", { name: "Xem gợi ý cơ bản" }).click();
   await expect(page.getByText("BẢN PHỐI THEO LỰA CHỌN")).toBeVisible();
   expect(
     await page.evaluate(
@@ -317,7 +323,7 @@ test("customization, local generation, save, reload and delete", async ({
   await page.getByLabel("Bạn sẽ đi đâu?").selectOption("Tết");
   await page.getByRole("button", { name: "Cá tính", exact: true }).click();
   await page.getByRole("button", { name: "Ngọc trai", exact: true }).click();
-  await page.getByRole("button", { name: "Tạo bản phối của tôi" }).click();
+  await page.getByRole("button", { name: "Xem gợi ý cơ bản" }).click();
   await expect(page.locator(".styling-tips")).toContainText("đỏ son");
   await expect(page.locator(".styling-tips")).toContainText("ngọc trai");
   await expect(page.locator(".styling-tips")).toContainText("sneaker");
@@ -348,7 +354,7 @@ test("Gemini request uses selected preferences and recovers from unavailability"
   page,
 }) => {
   await page.goto("/mix-match?garment=ao-tac&color=Kem%20lụa");
-  await page.getByRole("button", { name: "Tạo bản phối của tôi" }).click();
+  await page.getByRole("button", { name: "Xem gợi ý cơ bản" }).click();
   await page.route("**/api/style", async (route) => {
     const data = route.request().postDataJSON();
     expect(data.garment).toBe("Áo tấc");
@@ -358,7 +364,7 @@ test("Gemini request uses selected preferences and recovers from unavailability"
       json: { error: "Stylist Gemini chưa sẵn sàng." },
     });
   });
-  await page.getByRole("button", { name: "Gợi ý sâu hơn cùng Gemini" }).click();
+  await page.getByRole("button", { name: "Phối lại cùng Gemini" }).click();
   await expect(page.getByRole("status")).toContainText("chưa sẵn sàng");
   await expect(page.locator(".styling-tips li")).toHaveCount(4);
   await page.unroute("**/api/style");
@@ -374,7 +380,7 @@ test("Gemini request uses selected preferences and recovers from unavailability"
       },
     }),
   );
-  await page.getByRole("button", { name: "Gợi ý sâu hơn cùng Gemini" }).click();
+  await page.getByRole("button", { name: "Phối lại cùng Gemini" }).click();
   await expect(
     page.getByText("GỢI Ý TỪ GOOGLE GEMINI", { exact: true }),
   ).toBeVisible();
@@ -467,7 +473,7 @@ test("heritage search, region filters, detail and studio handoff", async ({
     page.getByRole("button", { name: "Áo tứ thân", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Bạn sẽ đi đâu?")).toHaveValue("Tết");
-  await page.getByRole("button", { name: "Tạo bản phối của tôi" }).click();
+  await page.getByRole("button", { name: "Xem gợi ý cơ bản" }).click();
   await expect(page.locator(".styling-tips")).toContainText("váy dài");
 });
 
@@ -476,7 +482,7 @@ test("lookbook compare, backup round trip, invalid import and undo", async ({
 }) => {
   for (const garment of ["tu-than", "ba-ba"]) {
     await page.goto(`/mix-match?garment=${garment}`);
-    await page.getByRole("button", { name: "Tạo bản phối của tôi" }).click();
+    await page.getByRole("button", { name: "Xem gợi ý cơ bản" }).click();
     await page.getByRole("button", { name: "Lưu vào lookbook" }).click();
     await expect(
       page.getByRole("button", { name: "Đã lưu bản phối" }),
@@ -698,7 +704,7 @@ test("unavailable WebGL keeps the studio usable without a fake 3D export", async
   await expect(
     page.getByRole("button", { name: "Tải ảnh 3D", exact: true }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Tạo bản phối của tôi" }).click();
+  await page.getByRole("button", { name: "Xem gợi ý cơ bản" }).click();
   await expect(page.locator(".styling-tips li")).toHaveCount(4);
 });
 

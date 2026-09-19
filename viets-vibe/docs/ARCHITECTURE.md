@@ -4,7 +4,7 @@
 
 Client gửi lựa chọn áo, bảng màu, các lớp trang phục, phụ kiện, sự kiện, `goal` (tối đa 400 ký tự) và ID phông nền. Dáng người và sắc da không gửi trong phần `layers`. Google nhận mô tả biên tập của địa danh, không nhận ảnh phông hoặc screenshot canvas. Ảnh món đồ chỉ gửi nếu người dùng tải ảnh lên và chủ động gọi Gemini.
 
-Phản hồi giữ các trường gợi ý cũ và thêm `nhận_xét`, `lý_do`, `bản_phối`. `lib/stylist.ts` kiểm tra danh mục áo/màu/phụ kiện, màu hex và kiểu lớp đồ trước khi API trả về hoặc client áp dụng. Người dùng bấm áp dụng mới đổi canvas; có hoàn tác. Bản lưu trước khi áp dụng không gắn lời mô tả của bộ AI vào bộ đang mặc. Lỗi từ Google được phân loại và trả thông báo đã biên tập, không chuyển nguyên lỗi nhà cung cấp cho client.
+Phản hồi giữ các trường gợi ý cũ và thêm `nhận_xét`, `lý_do`, `bản_phối`. `lib/stylist.ts` kiểm tra danh mục áo/màu/phụ kiện, màu hex, chất liệu và kiểu lớp đồ trước khi API trả về hoặc client áp dụng. Nút chính **Phối lại cùng Gemini** tự áp dụng cấu hình hợp lệ và giữ bộ cũ để hoàn tác. Khi hoàn tác, lời gợi ý vẫn hiện nhưng không gắn vào bộ cũ nếu lưu. **Xem gợi ý cơ bản** chỉ tạo lời gợi ý biên soạn, không gọi Google. Lỗi từ Google được phân loại và trả thông báo đã biên tập, không chuyển nguyên lỗi nhà cung cấp cho client.
 
 ## Phông Hà Nội
 
@@ -95,6 +95,10 @@ URL chia sẻ chứa lựa chọn, không chứa ảnh và nguyên văn lời g�
 Không có user account, database, rate limiter dùng chung hoặc phân quyền. Trước khi mở public với key trả phí, bổ sung giới hạn request ở gateway và ngân sách Google project. Đánh giá độ đúng văn hóa bằng kiểm thử nội dung và người biên tập, không chỉ dựa vào schema hoặc test UI.
 
 ## Canvas 3D và cấu hình bản phối
+
+`lib/mannequin-detail.ts` dựng mặt, tai, tóc búi thấp cho nữ/tóc ngắn rẽ ngôi cho nam. Chiều cao được phân bố vào chân và thân theo từng vùng, không dùng scale toàn mô hình nên đầu và bàn chân giữ kích thước. `useDeferredValue` tách cập nhật nhãn slider khỏi dựng mesh. Camera giữ toàn thân trong khung khi tăng chiều cao. Giá trị `neutral` trong bản lưu cũ vẫn đọc được và dùng kiểu tóc nữ mặc định.
+
+`fabric` nhận `silk`, `linen`, `brocade`, mặc định lụa khi đọc dữ liệu cũ. `MeshPhysicalMaterial` dùng sheen, roughness, bump texture thớ dệt tự tạo; vân gấm chỉ là hình học trang trí, không đại diện hoa văn lịch sử. UV trên tà/quần và nếp gấp hình học tạo bề mặt vải. RoomEnvironment cung cấp ánh sáng phản xạ studio. Texture/material/geometry được giải phóng khi thay mô hình. Đây chưa phải mô phỏng vải vật lý hay avatar quét từ người thật.
 
 `components/avatar-canvas.tsx` được tải động, không SSR. Three.js dựng cảnh WebGL, OrbitControls hỗ trợ xoay/zoom. `lib/mannequin.ts` tạo hình học theo từng loại áo: thân, tà, cổ, tay áo, lớp trong, quần/váy, giày và phụ kiện. Tài nguyên GPU được dispose khi đổi model hoặc rời trang. Renderer giới hạn pixel ratio, chỉ vẽ lại khi cảnh/camera thay đổi; tự xoay mặc định tắt. Thiết bị không có WebGL nhận thông báo và vẫn dùng được studio cơ bản.
 

@@ -25,7 +25,7 @@
 
 ## Q&A dự kiến
 
-**AI làm gì?** Gợi ý cách phối từ lựa chọn và ảnh tham khảo nếu có. Ma-nơ-canh 3D chạy bằng Three.js, không dùng AI; Gemini chưa tạo ảnh hoặc thử đồ lên ảnh người.
+**AI làm gì?** Nút **Phối lại cùng Gemini** đề xuất cấu hình màu, chất liệu, quần/váy, giày và phụ kiện theo yêu cầu, rồi áp dụng ngay lên người mẫu. Thẻ kết quả giải thích thay đổi và có hoàn tác. Ma-nơ-canh 3D chạy bằng Three.js; Gemini chưa tạo ảnh hoặc thử đồ lên ảnh người. **Xem gợi ý cơ bản** là nội dung cục bộ, không dùng AI.
 
 **Thông tin văn hóa có chắc chắn không?** Có nguồn dẫn, tránh diễn giải biểu tượng không có căn cứ. Chưa được chuyên gia thẩm định toàn bộ; phục dựng hoặc nghi lễ cần kiểm tra chuyên môn.
 

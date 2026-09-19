@@ -204,7 +204,11 @@ export async function POST(request: Request) {
     const parts: Array<{
       text?: string;
       inlineData?: { mimeType: string; data: string };
-    }> = [{ text: prompt }];
+    }> = [
+      {
+        text: `${prompt}\nNgười dùng bấm PHỐI LẠI: đề xuất một phương án thay thế có thay đổi rõ ràng, thường ở ít nhất hai lựa chọn màu/lớp đồ/phụ kiện, trừ các chi tiết họ yêu cầu giữ. Không chỉ nhắc lại bộ đang mặc. Chọn layers.fabric: silk (lụa mềm ánh nhẹ), linen (đũi lì thớ mộc), brocade (gấm có vân dệt). Giải thích chất liệu theo thời tiết/sự kiện nếu có dữ liệu, không tự bịa thời tiết. Chất liệu trong ứng dụng là mô phỏng bề mặt, không phải vải thật. Giữ cấu trúc đặc trưng văn hóa; không đổi áo ngẫu nhiên chỉ để tạo khác biệt.`,
+      },
+    ];
 
     if (imageBase64) {
       parts.push({

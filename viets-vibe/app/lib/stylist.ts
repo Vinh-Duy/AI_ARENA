@@ -8,7 +8,14 @@ import type { AvatarConfig } from "./avatar";
 
 export type StylingLayers = Pick<
   AvatarConfig,
-  "inner" | "bottom" | "accent" | "shoes" | "bottomType" | "footwear" | "collar"
+  | "inner"
+  | "bottom"
+  | "accent"
+  | "shoes"
+  | "bottomType"
+  | "footwear"
+  | "collar"
+  | "fabric"
 >;
 export type OutfitRecommendation = {
   garment: string;
@@ -25,7 +32,8 @@ export function validLayers(value: unknown): value is StylingLayers {
     ) &&
     ["trousers", "skirt"].includes(a.bottomType) &&
     ["flats", "sneakers"].includes(a.footwear) &&
-    typeof a.collar === "boolean"
+    typeof a.collar === "boolean" &&
+    (a.fabric === undefined || ["silk", "linen", "brocade"].includes(a.fabric))
   );
 }
 export function validRecommendation(
@@ -80,6 +88,7 @@ export const recommendationSchema = {
         bottomType: { type: "string", enum: ["trousers", "skirt"] },
         footwear: { type: "string", enum: ["flats", "sneakers"] },
         collar: { type: "boolean" },
+        fabric: { type: "string", enum: ["silk", "linen", "brocade"] },
       },
       required: [
         "inner",
@@ -89,6 +98,7 @@ export const recommendationSchema = {
         "bottomType",
         "footwear",
         "collar",
+        "fabric",
       ],
     },
   },
