@@ -11,6 +11,17 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Download, RotateCcw, Rotate3D, ZoomIn, ZoomOut } from "lucide-react";
 import { buildMannequin, disposeModel } from "../lib/mannequin";
 import type { AvatarConfig } from "../lib/avatar";
+import { findBackdrop } from "../lib/backdrops";
+
+function fitBackground(texture: T.Texture, aspect: number) {
+  const image = texture.image as HTMLImageElement;
+  const imageAspect = image.width / image.height;
+  texture.repeat.set(
+    Math.min(1, aspect / imageAspect),
+    Math.min(1, imageAspect / aspect),
+  );
+  texture.offset.set((1 - texture.repeat.x) / 2, (1 - texture.repeat.y) / 2);
+}
 export type AvatarHandle = { thumbnail: () => string | undefined };
 type Props = {
   garment: string;
@@ -18,6 +29,7 @@ type Props = {
   extras: string[];
   avatar: AvatarConfig;
   ref?: Ref<AvatarHandle>;
+  backdrop?: string;
 };
 export default function AvatarCanvas({
   garment,
@@ -25,7 +37,9 @@ export default function AvatarCanvas({
   extras,
   avatar,
   ref,
+  backdrop = "studio",
 }: Props) {
+  const location = findBackdrop(backdrop);
   const host = useRef<HTMLDivElement>(null);
   const runtime = useRef<{
     renderer: T.WebGLRenderer;
@@ -34,16 +48,27 @@ export default function AvatarCanvas({
     controls: OrbitControls;
     model?: T.Group;
     dirty: boolean;
+    floor: T.Mesh;
+    plinth: T.Mesh;
+    backgroundId: string;
   } | null>(null);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
   const [rotating, setRotating] = useState(false);
   const [view, setView] = useState("front");
   const [notice, setNotice] = useState("");
+  const [loadedBackdrop, setLoadedBackdrop] = useState("studio");
+  const [backgroundError, setBackgroundError] = useState("");
+  const canExport = ready && !error && loadedBackdrop === location.id;
   useImperativeHandle(ref, () => ({
     thumbnail() {
       const r = runtime.current;
-      if (!r || !r.model || r.renderer.getContext().isContextLost())
+      if (
+        !r ||
+        !r.model ||
+        r.backgroundId !== location.id ||
+        r.renderer.getContext().isContextLost()
+      )
         return undefined;
       r.renderer.render(r.scene, r.camera);
       const image = document.createElement("canvas");
@@ -144,6 +169,9 @@ export default function AvatarCanvas({
       controls,
       dirty: true,
       model: undefined as T.Group | undefined,
+      floor,
+      plinth,
+      backgroundId: "studio",
     };
     runtime.current = r;
     const resize = new ResizeObserver(() => {
@@ -153,6 +181,8 @@ export default function AvatarCanvas({
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      if (scene.background instanceof T.Texture)
+        fitBackground(scene.background, camera.aspect);
       r.dirty = true;
     });
     resize.observe(element);
@@ -202,6 +232,58 @@ export default function AvatarCanvas({
     r.scene.add(r.model);
     r.dirty = true;
   }, [garment, color, extras, avatar]);
+  useEffect(() => {
+    const r = runtime.current;
+    if (!r) return;
+    let cancelled = false;
+    let texture: T.Texture | undefined;
+    r.backgroundId = "studio";
+    r.scene.background = new T.Color("#eae6dc");
+    r.floor.visible = true;
+    r.plinth.visible = true;
+    r.dirty = true;
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setBackgroundError("");
+        setLoadedBackdrop("studio");
+      }
+    });
+    if (location.image) {
+      new T.TextureLoader().load(
+        location.image,
+        (loaded) => {
+          if (cancelled) {
+            loaded.dispose();
+            return;
+          }
+          texture = loaded;
+          loaded.colorSpace = T.SRGBColorSpace;
+          fitBackground(loaded, r.camera.aspect);
+          r.scene.background = loaded;
+          r.floor.visible = false;
+          r.plinth.visible = false;
+          r.backgroundId = location.id;
+          r.dirty = true;
+          setLoadedBackdrop(location.id);
+        },
+        undefined,
+        () => {
+          if (!cancelled)
+            setBackgroundError(
+              "Chưa tải được phông ảnh. Chọn lại địa danh hoặc dùng nền Phòng thử để xuất ảnh.",
+            );
+        },
+      );
+    }
+    return () => {
+      cancelled = true;
+      if (texture) {
+        if (r.scene.background === texture)
+          r.scene.background = new T.Color("#eae6dc");
+        texture.dispose();
+      }
+    };
+  }, [location]);
   function angle(next: string) {
     const r = runtime.current;
     if (!r) return;
@@ -231,7 +313,7 @@ export default function AvatarCanvas({
       const source = r.renderer.domElement,
         image = document.createElement("canvas");
       image.width = source.width;
-      image.height = source.height + 94;
+      image.height = source.height + (location.image ? 145 : 94);
       const ctx = image.getContext("2d");
       if (!ctx) throw new Error();
       ctx.fillStyle = "#f8f6f0";
@@ -245,7 +327,23 @@ export default function AvatarCanvas({
         "Phác thảo phom & màu · không phải phục dựng hay đo độ vừa vặn",
         24,
         source.height + 66,
+        image.width - 48,
       );
+      if (location.image) {
+        ctx.font = "12px sans-serif";
+        const credit = `${location.name} · Phông minh họa tạo bằng AI, mang phong cách 3D. Kiến trúc cách điệu, không phải ảnh thực địa hay phục dựng lịch sử.`;
+        let line = "",
+          y = source.height + 92;
+        for (const char of credit) {
+          if (ctx.measureText(line + char).width > image.width - 48) {
+            ctx.fillText(line, 24, y);
+            line = "";
+            y += 17;
+          }
+          line += char;
+        }
+        ctx.fillText(line, 24, y);
+      }
       const link = document.createElement("a");
       link.download = `viets-vibe-${garment}-3d.png`;
       link.href = image.toDataURL("image/png");
@@ -258,19 +356,25 @@ export default function AvatarCanvas({
   return (
     <div className="avatar-workspace">
       <div
-        className="avatar-stage"
+        className={`avatar-stage${location.image ? " on-location" : ""}`}
         data-ready={ready && !error}
         data-garment={garment}
         data-build={avatar.build}
         data-skin={avatar.skin}
+        data-backdrop={location.id}
+        data-background-ready={loadedBackdrop === location.id}
       >
         <div ref={host} className="avatar-renderer" />
         <div className="stage-heading">
-          <span>THE FITTING ROOM</span>
+          <span>
+            {location.image
+              ? `HÀ NỘI / ${location.name.toUpperCase()}`
+              : "THE FITTING ROOM"}
+          </span>
           <strong>Chất riêng, mọi góc nhìn.</strong>
         </div>
         <span className="stage-badge">
-          LIVE 3D <i />
+          {location.image ? "3D / HÀ NỘI CÁCH ĐIỆU" : "LIVE 3D"} <i />
         </span>
         <span className="stage-watermark" aria-hidden="true">
           v.
@@ -309,6 +413,14 @@ export default function AvatarCanvas({
           Kéo để xoay 360° · Cuộn / chụm để zoom
         </span>
       </div>
+      {backgroundError && (
+        <p className="export-notice" role="status">
+          {backgroundError}
+        </p>
+      )}
+      {location.image && loadedBackdrop !== location.id && !backgroundError && (
+        <p className="export-notice">Đang tải phông {location.name}…</p>
+      )}
       <div className="canvas-toolbar">
         <div className="view-options" aria-label="Góc nhìn">
           {[
@@ -340,11 +452,7 @@ export default function AvatarCanvas({
             <Rotate3D size={15} /> Tự xoay
           </button>
         </div>
-        <button
-          className="text-link"
-          disabled={!ready || !!error}
-          onClick={download}
-        >
+        <button className="text-link" disabled={!canExport} onClick={download}>
           <Download size={16} /> Tải ảnh 3D
         </button>
       </div>
@@ -356,6 +464,13 @@ export default function AvatarCanvas({
       <p className="reference-note">
         Mô hình minh họa phom và màu. Chưa mô phỏng chất vải, số đo may hoặc
         phục dựng lịch sử.
+        {location.image && (
+          <>
+            {" "}
+            Phông minh họa AI dạng 2D, phong cách 3D; ma-nơ-canh xoay độc lập.{" "}
+            <a href={location.source}>Về bối cảnh minh họa</a>.
+          </>
+        )}
       </p>
     </div>
   );
