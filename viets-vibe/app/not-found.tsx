@@ -16,7 +16,7 @@ export default function NotFound() {
         <p>
           Đường dẫn có thể đã thay đổi. Những câu chuyện khác vẫn đang chờ bạn.
         </p>
-        <Link href="/heritage" className="button button-orange">
+        <Link href="/heritage" className="button button-primary">
           Trở về thư viện <ArrowUpRight size={17} />
         </Link>
       </main>

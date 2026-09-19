@@ -104,7 +104,7 @@ export default async function GarmentPage({
             </div>
             <Link
               href={`/mix-match?garment=${garment.id}`}
-              className="button button-orange"
+              className="button button-primary"
             >
               Phối {garment.name.toLowerCase()} theo chất riêng{" "}
               <ArrowUpRight size={17} />

@@ -6,7 +6,6 @@ import {
   ArrowDown,
   ArrowRight,
   ArrowUpRight,
-  Asterisk,
   Check,
   Heart,
   MoveUpRight,
@@ -15,6 +14,7 @@ import {
 import { Header, Footer, Reveal } from "./components/site";
 import { garments, regions } from "./lib/heritage";
 import { GarmentCard } from "./components/garment-card";
+import { BrandMark } from "./components/brand-mark";
 export default function Home() {
   const [filter, setFilter] = useState("Tất cả");
   return (
@@ -31,7 +31,7 @@ export default function Home() {
               <br />
               <em>Chất mới.</em>
               <span className="title-spark" aria-hidden="true">
-                ✳
+                <BrandMark size={48} />
               </span>
             </h1>
             <p className="hero-description">
@@ -45,7 +45,7 @@ export default function Home() {
               mình.
             </p>
             <div className="hero-actions">
-              <Link href="/mix-match" className="button button-orange">
+              <Link href="/mix-match" className="button button-primary">
                 Bắt đầu phối đồ <ArrowUpRight size={19} />
               </Link>
               <a href="#explore" className="text-link">
@@ -99,7 +99,7 @@ export default function Home() {
               </div>
             </div>
             <div className="round-stamp">
-              <Asterisk size={37} strokeWidth={1} />
+              <BrandMark size={37} />
               <span>RẤT VIỆT. RẤT BẠN.</span>
             </div>
             <span className="photo-index">
@@ -111,8 +111,8 @@ export default function Home() {
           <div className="ticker-track">
             {Array.from({ length: 4 }, (_, i) => (
               <span key={i} aria-hidden={i > 0}>
-                DI SẢN KHÔNG ĐỨNG YÊN <Asterisk /> PHONG CÁCH KHÔNG GIỚI HẠN{" "}
-                <Asterisk /> RẤT VIỆT. RẤT BẠN. <Asterisk />
+                DI SẢN KHÔNG ĐỨNG YÊN <BrandMark /> PHONG CÁCH KHÔNG GIỚI HẠN{" "}
+                <BrandMark /> RẤT VIỆT. RẤT BẠN. <BrandMark />
               </span>
             ))}
           </div>
@@ -195,7 +195,7 @@ export default function Home() {
                 <small>Đương đại. Nhưng không phai bản sắc.</small>
               </div>
               <span className="art-doodle" aria-hidden="true">
-                ✳
+                <BrandMark size={48} />
               </span>
             </div>
             <div className="teaser-copy">

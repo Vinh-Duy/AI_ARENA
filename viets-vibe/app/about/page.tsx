@@ -56,7 +56,7 @@ export default function About() {
             mặc thế nào cho đúng dịp, hợp gu và vẫn tôn trọng câu chuyện phía
             sau?
           </p>
-          <Link href="/heritage" className="button button-orange">
+          <Link href="/heritage" className="button button-primary">
             Bắt đầu từ một chiếc áo <ArrowUpRight size={17} />
           </Link>
         </div>

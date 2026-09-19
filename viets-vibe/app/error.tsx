@@ -19,7 +19,7 @@ export default function ErrorPage({
         </h1>
         <p>Trang này chưa tải được. Bạn thử lại hoặc trở về trang chủ nhé.</p>
         <div className="look-actions">
-          <button onClick={retry} className="button button-orange">
+          <button onClick={retry} className="button button-primary">
             Thử lại
           </button>
           <Link href="/" className="button button-outline">

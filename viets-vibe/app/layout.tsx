@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { RouteScroll } from "./components/route-scroll";
 const sansFont = Be_Vietnam_Pro({
   variable: "--font-body",
   subsets: ["latin", "vietnamese"],
@@ -27,9 +28,13 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
+      data-scroll-behavior="smooth"
       className={`${sansFont.variable} ${editorialFont.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <RouteScroll />
+      </body>
     </html>
   );
 }

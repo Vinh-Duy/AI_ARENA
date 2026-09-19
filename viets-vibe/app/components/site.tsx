@@ -1,7 +1,8 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, type MouseEvent } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Asterisk, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { BrandMark } from "./brand-mark";
 import { motion, MotionConfig } from "framer-motion";
 export function Reveal({
   children,
@@ -32,6 +33,19 @@ export function Header({
   active?: "home" | "studio" | "lookbook";
 }) {
   const [open, setOpen] = useState(false);
+  function navigate(event: MouseEvent<HTMLAnchorElement>) {
+    setOpen(false);
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
+    const target = new URL(event.currentTarget.href);
+    if (
+      target.pathname === window.location.pathname &&
+      target.search === window.location.search &&
+      !target.hash
+    ) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }
   const links = [
     { href: "/heritage", text: "Khám phá", id: "home" },
     { href: "/mix-match", text: "Phòng phối đồ", id: "studio" },
@@ -40,8 +54,13 @@ export function Header({
   return (
     <header className="site-header">
       <div className="nav-wrap">
-        <Link href="/" className="brand" aria-label="Việt's Vibe — Trang chủ">
-          <Asterisk className="brand-mark" size={34} strokeWidth={1.5} />
+        <Link
+          href="/"
+          className="brand"
+          aria-label="Việt's Vibe — Trang chủ"
+          onClick={navigate}
+        >
+          <BrandMark className="brand-mark" size={34} />
           <span>
             việt’s vibe<span className="brand-dot">.</span>
           </span>
@@ -52,12 +71,17 @@ export function Header({
               className={active === link.id ? "active" : ""}
               key={link.id}
               href={link.href}
+              onClick={navigate}
             >
               {link.text}
             </Link>
           ))}
         </nav>
-        <Link href="/mix-match" className="button button-dark nav-cta">
+        <Link
+          href="/mix-match"
+          className="button button-dark nav-cta"
+          onClick={navigate}
+        >
           Thử chất riêng <ArrowUpRight size={16} />
         </Link>
         <button
@@ -72,7 +96,7 @@ export function Header({
       {open && (
         <nav className="mobile-nav" aria-label="Điều hướng di động">
           {links.map((link) => (
-            <Link key={link.id} href={link.href} onClick={() => setOpen(false)}>
+            <Link key={link.id} href={link.href} onClick={navigate}>
               {link.text}
               <ArrowUpRight size={16} />
             </Link>
@@ -86,8 +110,8 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <Link className="brand" href="/">
-        <Asterisk size={28} />
-        <span>việt’s vibe.</span>
+        <BrandMark className="brand-mark" size={28} />
+        <span>Việt’s vibe.</span>
       </Link>
       <p>Tự hào bản sắc. Tự do thể hiện.</p>
       <span>VIỆT PHỤC REMIX · 2026</span>

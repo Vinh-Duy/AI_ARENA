@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { legacyPhotoBackdrops } from "../lib/backdrops";
 import Link from "next/link";
 import { Footer, Header } from "../components/site";
 import { garments } from "../lib/heritage";
@@ -37,6 +38,37 @@ export default function Credits() {
             </a>
           </article>
         ))}
+        <h2 id="hanoi-illustrations">Hà Nội qua nét vẽ 3D</h2>
+        <p>
+          Phông Hồ Gươm, Văn Miếu và cầu Long Biên trong phòng phối đồ là minh
+          họa tạo bằng AI: hình khối giản lược, màu dịu và ánh sáng mềm để hòa
+          với ma-nơ-canh. Đây là ảnh nền 2D mang phong cách 3D. Kiến trúc và
+          cảnh quan được cách điệu, không dùng làm tư liệu phục dựng hoặc mô tả
+          chính xác địa điểm ngoài đời.
+        </p>
+        <h2>Ảnh phông của bản lưu cũ</h2>
+        <p>
+          Những thumbnail lưu trước khi đổi sang minh họa có thể vẫn dùng các
+          ảnh dưới đây, với giấy phép Creative Commons ghi rõ tại nguồn. Phông
+          được cắt khung để vừa canvas và ghép với ma-nơ-canh; không phải ảnh
+          chụp người thật tại địa danh.
+        </p>
+        {legacyPhotoBackdrops
+          .filter((b) => b.image)
+          .map((b) => (
+            <article key={b.id}>
+              <h3>{b.name}</h3>
+              <p>
+                Ảnh: {b.credit} ·{" "}
+                <a href={b.licenseUrl} target="_blank" rel="noreferrer">
+                  {b.license}
+                </a>
+              </p>
+              <a href={b.source} target="_blank" rel="noreferrer">
+                Xem ảnh gốc & giấy phép ↗
+              </a>
+            </article>
+          ))}
         <h2>Ảnh biên tập khác</h2>
         <p>
           Ảnh áo dài trắng với ô lụa trong khu vườn: Aaron Joel Santos /{" "}
