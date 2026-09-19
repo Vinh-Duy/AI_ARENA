@@ -6,6 +6,7 @@ import { ArrowUpRight, Bookmark, Plus, Trash2 } from "lucide-react";
 import { Footer, Header, Reveal } from "../components/site";
 import { LookbookTools } from "../components/lookbook-tools";
 import { colors, garments, type SavedLook } from "../lib/heritage";
+import { findBackdrop } from "../lib/backdrops";
 import {
   parseLooks,
   writeLooks,
@@ -56,7 +57,7 @@ export default function Lookbook() {
               </h1>
               <p>Những bản phối đã lưu, những câu chuyện chưa kể.</p>
             </div>
-            <Link href="/mix-match" className="button button-orange">
+            <Link href="/mix-match" className="button button-primary">
               <Plus size={17} /> Tạo bản phối mới
             </Link>
           </div>
@@ -99,6 +100,7 @@ export default function Lookbook() {
             {looks.map((look) => {
               const garment = garments.find((g) => g.id === look.garment)!;
               const color = colors.find((c) => c.name === look.color)!;
+              const backdrop = findBackdrop(look.backdrop);
               const query = new URLSearchParams({
                 garment: look.garment,
                 color: look.color,
@@ -107,6 +109,7 @@ export default function Lookbook() {
                 extras: look.accessories.join(","),
               });
               if (look.avatar) query.set("avatar", JSON.stringify(look.avatar));
+              if (look.backdrop) query.set("backdrop", look.backdrop);
               return (
                 <article className="saved-card" key={look.id}>
                   <Link className="saved-image" href={`/mix-match?${query}`}>
@@ -142,6 +145,14 @@ export default function Lookbook() {
                       {look.color} ·{" "}
                       {look.accessories.join(" + ") || "Tối giản phụ kiện"}
                     </p>
+                    {look.thumbnail && backdrop.image && (
+                      <small className="backdrop-credit">
+                        Phông {backdrop.name} ·{" "}
+                        <Link href="/credits#hanoi-illustrations">
+                          Thông tin hình ảnh
+                        </Link>
+                      </small>
+                    )}
                     {look.result && (
                       <details>
                         <summary>Xem gợi ý đã lưu</summary>

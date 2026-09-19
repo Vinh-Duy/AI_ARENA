@@ -1,4 +1,6 @@
 import { validAvatar } from "./avatar";
+import { backdrops } from "./backdrops";
+import { validSuggestion } from "./stylist";
 import {
   accessories,
   colors,
@@ -28,17 +30,13 @@ export function parseLooks(value: string): SavedLook[] {
         (a: unknown) => typeof a === "string" && accessories.includes(a),
       ) &&
       (!l.avatar || validAvatar(l.avatar)) &&
+      (l.backdrop === undefined ||
+        backdrops.some((b) => b.id === l.backdrop)) &&
       (!l.thumbnail ||
         (typeof l.thumbnail === "string" &&
           l.thumbnail.length < 300_000 &&
           /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(l.thumbnail))) &&
-      (!l.result ||
-        (typeof l.result === "object" &&
-          typeof l.result["tên_trang_phục"] === "string" &&
-          typeof l.result["nguồn_gốc"] === "string" &&
-          typeof l.result["cảnh_báo_văn_hóa"] === "string" &&
-          Array.isArray(l.result["gợi_ý_phối"]) &&
-          l.result["gợi_ý_phối"].every((s: unknown) => typeof s === "string"))),
+      (!l.result || validSuggestion(l.result)),
   );
 }
 export function writeLooks(looks: SavedLook[]) {
