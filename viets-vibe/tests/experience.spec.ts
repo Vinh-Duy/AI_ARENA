@@ -1,5 +1,162 @@
 import { test, expect, type Page } from "@playwright/test";
 
+test("Hanoi backdrops export and persist with an applicable AI outfit", async ({
+  page,
+}) => {
+  await page.goto("/mix-match?garment=ao-dai");
+  await expect(page.locator(".avatar-stage")).toHaveAttribute(
+    "data-ready",
+    "true",
+  );
+  const studioImage = await page
+    .locator(".avatar-renderer canvas")
+    .evaluate((c) => (c as HTMLCanvasElement).toDataURL());
+  for (const [id, label] of [
+    ["ho-guom", "Hồ Gươm"],
+    ["long-bien", "Cầu Long Biên"],
+    ["van-mieu", "Văn Miếu"],
+  ]) {
+    await page.getByRole("button", { name: label, exact: true }).click();
+    await expect(page.locator(".avatar-stage")).toHaveAttribute(
+      "data-backdrop",
+      id,
+    );
+    await expect(page.locator(".avatar-stage")).toHaveAttribute(
+      "data-background-ready",
+      "true",
+    );
+  }
+  await expect
+    .poll(() =>
+      page
+        .locator(".avatar-renderer canvas")
+        .evaluate((c) => (c as HTMLCanvasElement).toDataURL()),
+    )
+    .not.toBe(studioImage);
+  await page
+    .getByLabel("Bạn muốn stylist giúp gì?")
+    .fill("Phối nhẹ nhàng để chụp kỷ yếu, ít phụ kiện.");
+  await page.route("**/api/style", async (route) => {
+    const body = route.request().postDataJSON();
+    expect(body.backdrop).toBe("van-mieu");
+    expect(body.goal).toContain("kỷ yếu");
+    expect(body.layers.bottomType).toBe("trousers");
+    expect(body.layers).not.toHaveProperty("skin");
+    await route.fulfill({
+      json: {
+        suggestion: {
+          tên_trang_phục: "Áo dài kem bên Văn Miếu",
+          nguồn_gốc: "Tư liệu thử nghiệm",
+          gợi_ý_phối: ["Áo kem phối quần trầm, một chiếc quạt làm điểm nhấn."],
+          cảnh_báo_văn_hóa: "Giữ cổ áo và cách mặc phù hợp di tích.",
+          nhận_xét: "Bản hiện tại có thể nhẹ nhàng hơn.",
+          lý_do: "Màu kem tạo khoảng sáng trước nền gạch đỏ.",
+          bản_phối: {
+            garment: "ao-dai",
+            color: "Kem lụa",
+            accessories: ["Quạt giấy"],
+            layers: {
+              inner: "#f5ead6",
+              bottom: "#53634c",
+              accent: "#b6a577",
+              shoes: "#49382d",
+              bottomType: "trousers",
+              footwear: "flats",
+              collar: true,
+            },
+          },
+        },
+      },
+    });
+  });
+  await page.getByRole("button", { name: "Gợi ý sâu hơn cùng Gemini" }).click();
+  await expect(
+    page.getByRole("region", { name: "Bản phối stylist đề xuất" }),
+  ).toContainText("nền gạch đỏ");
+  await expect(
+    page.getByRole("button", { name: "Ngọc bích", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page
+    .getByRole("button", { name: "Áp dụng bản phối AI", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Kem lụa", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Trở lại bản phối trước" }).click();
+  await expect(
+    page.getByRole("button", { name: "Ngọc bích", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page
+    .getByRole("button", { name: "Áp dụng bản phối AI", exact: true })
+    .click();
+  await capture(page, "hanoi-stylist-desktop");
+  const downloading = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Tải ảnh 3D" }).click();
+  expect((await downloading).suggestedFilename()).toContain(".png");
+  await page
+    .getByRole("button", { name: "Lưu vào lookbook", exact: true })
+    .click();
+  await page.goto("/lookbook");
+  await expect(page.locator(".saved-image img")).toHaveAttribute(
+    "src",
+    /^data:image\/jpeg/,
+  );
+  await page.getByRole("link", { name: "Phối tiếp" }).click();
+  await expect(page.locator(".avatar-stage")).toHaveAttribute(
+    "data-backdrop",
+    "van-mieu",
+  );
+  await expect(page.locator(".avatar-stage")).toHaveAttribute(
+    "data-background-ready",
+    "true",
+  );
+  await expect(
+    page.getByRole("button", { name: "Kem lụa", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await capture(page, "hanoi-stylist-mobile");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("broken backdrop and malformed AI plan fail without changing the outfit", async ({
+  page,
+}) => {
+  await page.route("**/images/hanoi-ho-guom-illustration.png", (route) =>
+    route.abort(),
+  );
+  await page.goto("/mix-match?backdrop=ho-guom");
+  await expect(page.getByRole("status")).toContainText(
+    "Chưa tải được phông ảnh",
+  );
+  await expect(page.getByRole("button", { name: "Tải ảnh 3D" })).toBeDisabled();
+  await page.getByRole("button", { name: "Phòng thử", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Tải ảnh 3D" })).toBeEnabled();
+  await page.route("**/api/style", (route) =>
+    route.fulfill({
+      json: {
+        suggestion: {
+          tên_trang_phục: "Bản sai",
+          nguồn_gốc: "",
+          cảnh_báo_văn_hóa: "",
+          gợi_ý_phối: ["Mặc đẹp"],
+          bản_phối: { garment: "unknown" },
+        },
+      },
+    }),
+  );
+  await page.getByRole("button", { name: "Gợi ý sâu hơn cùng Gemini" }).click();
+  await expect(
+    page.getByRole("button", { name: "Áp dụng bản phối AI", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Ngọc bích", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+});
+
 async function capture(page: Page, name: string) {
   for (const image of await page.locator("main img").all()) {
     if (!(await image.isVisible())) continue;
@@ -21,6 +178,75 @@ async function capture(page: Page, name: string) {
     );
   await page.screenshot({ path: `test-results/${name}.png`, fullPage: true });
 }
+
+test("page links open at the top while section links keep their target", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const expectTopToStay = async () => {
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    // Dev route loading may trigger another scroll after the first frame.
+    const largestOffset = await page.evaluate(
+      () =>
+        new Promise<number>((resolve) => {
+          const start = performance.now();
+          let largest = 0;
+          const sample = () => {
+            largest = Math.max(largest, Math.abs(window.scrollY));
+            if (performance.now() - start >= 1500) resolve(largest);
+            else requestAnimationFrame(sample);
+          };
+          requestAnimationFrame(sample);
+        }),
+    );
+    expect(largestOffset).toBe(0);
+  };
+  await page.goto("/");
+  await page.locator('a[href="#explore"]').click();
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(300);
+  await page.locator(".garment-card").first().click();
+  await expect(page).toHaveURL(/\/heritage\//);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.locator('.site-footer a[href="/about"]').click();
+  await expect(page).toHaveURL(/\/about$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  for (const [label, path] of [
+    ["Khám phá", "/heritage"],
+    ["Phòng phối đồ", "/mix-match"],
+    ["Lookbook của bạn", "/lookbook"],
+  ]) {
+    await page.evaluate(() =>
+      window.scrollTo({ top: 600, behavior: "instant" }),
+    );
+    await page
+      .getByRole("navigation", { name: "Điều hướng chính" })
+      .getByRole("link", { name: label, exact: true })
+      .click();
+    await expect(page).toHaveURL(new RegExp(`${path}$`));
+    await expectTopToStay();
+    await page.evaluate(() =>
+      window.scrollTo({ top: 600, behavior: "instant" }),
+    );
+    await page
+      .getByRole("navigation", { name: "Điều hướng chính" })
+      .getByRole("link", { name: label, exact: true })
+      .click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('.site-footer a[href="/privacy"]').click();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expectTopToStay();
+  await page.getByRole("button", { name: "Mở menu" }).click();
+  await page
+    .getByRole("navigation", { name: "Điều hướng di động" })
+    .getByRole("link", { name: "Phòng phối đồ", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/mix-match$/);
+  await expectTopToStay();
+});
 
 test("desktop collection filters, imagery and layout", async ({ page }) => {
   const errors: string[] = [];
