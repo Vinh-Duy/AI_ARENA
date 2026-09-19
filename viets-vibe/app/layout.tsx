@@ -1,38 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans, Playfair_Display } from "next/font/google";
+import { Be_Vietnam_Pro, Playfair_Display } from "next/font/google";
 import "./globals.css";
-
-const displayFont = Cormorant_Garamond({
-  variable: "--font-display",
-  subsets: ["latin"],
+const sansFont = Be_Vietnam_Pro({
+  variable: "--font-body",
+  subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
-
-const sansFont = DM_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
 const editorialFont = Playfair_Display({
-  variable: "--font-editorial",
-  subsets: ["latin"],
+  variable: "--font-heading",
+  subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
+  display: "swap",
 });
-
 export const metadata: Metadata = {
-  title: "Việt's Vibe | Khám phá Việt Phục",
-  description: "Một không gian để khám phá và biến tấu Việt phục.",
+  title: "Việt’s Vibe — Nếp xưa. Chất mới.",
+  description:
+    "Khám phá Việt phục, phối màu và phụ kiện theo chất riêng. Sáng tạo cùng Google Gemini, từ sự thấu hiểu văn hóa Việt.",
+  icons: { icon: "/icon.svg" },
 };
-
-export const viewport: Viewport = {
-  themeColor: "#101a16",
-};
-
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export const viewport: Viewport = { themeColor: "#f8f6f0" };
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={`${displayFont.variable} ${sansFont.variable} ${editorialFont.variable}`}>
+    <html
+      lang="vi"
+      className={`${sansFont.variable} ${editorialFont.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
