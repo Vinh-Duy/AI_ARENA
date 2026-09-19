@@ -1,4 +1,40 @@
 @import "tailwindcss";
+
+.height-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 7px;
+}
+.height-presets {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 6px;
+}
+.height-presets button {
+  flex: 1;
+  padding: 9px 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  font-size: 11px;
+}
+.height-presets button[aria-pressed="true"] {
+  background: var(--sage);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.fabric-select {
+  grid-column: 1 / -1;
+}
+.outfit-changes {
+  padding: 14px 18px 14px 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.9;
+}
 .backdrop-picker {
   margin-bottom: 18px;
 }
@@ -368,6 +404,32 @@ svg {
   padding: 12px 19px;
   font-size: 11px;
   gap: 20px;
+}
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 0;
+  color: #77796f;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+.language-toggle .selected {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.mobile-language-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  color: var(--foreground);
+  font-size: 13px;
+  text-align: left;
 }
 .mobile-toggle,
 .mobile-nav {

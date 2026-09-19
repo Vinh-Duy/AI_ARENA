@@ -33,6 +33,17 @@ export function Header({
   active?: "home" | "studio" | "lookbook";
 }) {
   const [open, setOpen] = useState(false);
+  const [language, setLanguage] = useState<"vi" | "en">(() =>
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("viets-vibe-language") === "en"
+      ? "en"
+      : "vi",
+  );
+  function toggleLanguage() {
+    const nextLanguage = language === "vi" ? "en" : "vi";
+    setLanguage(nextLanguage);
+    window.localStorage.setItem("viets-vibe-language", nextLanguage);
+  }
   function navigate(event: MouseEvent<HTMLAnchorElement>) {
     setOpen(false);
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
@@ -47,9 +58,21 @@ export function Header({
     }
   }
   const links = [
-    { href: "/heritage", text: "Khám phá", id: "home" },
-    { href: "/mix-match", text: "Phòng phối đồ", id: "studio" },
-    { href: "/lookbook", text: "Lookbook của bạn", id: "lookbook" },
+    {
+      href: "/heritage",
+      text: language === "vi" ? "Khám phá" : "Explore",
+      id: "home",
+    },
+    {
+      href: "/mix-match",
+      text: language === "vi" ? "Phòng phối đồ" : "Mix studio",
+      id: "studio",
+    },
+    {
+      href: "/lookbook",
+      text: language === "vi" ? "Lookbook của bạn" : "Your lookbook",
+      id: "lookbook",
+    },
   ];
   return (
     <header className="site-header">
@@ -62,7 +85,7 @@ export function Header({
         >
           <BrandMark className="brand-mark" size={34} />
           <span>
-            việt’s vibe<span className="brand-dot">.</span>
+            Viets Vibe<span className="brand-dot">.</span>
           </span>
         </Link>
         <nav className="desktop-nav" aria-label="Điều hướng chính">
@@ -82,8 +105,24 @@ export function Header({
           className="button button-dark nav-cta"
           onClick={navigate}
         >
-          Thử chất riêng <ArrowUpRight size={16} />
+          {language === "vi" ? "Thử chất riêng" : "Try your style"}{" "}
+          <ArrowUpRight size={16} />
         </Link>
+        <button
+          className="language-toggle"
+          type="button"
+          onClick={toggleLanguage}
+          aria-label={
+            language === "vi" ? "Switch to English" : "Chuyển sang tiếng Việt"
+          }
+          title={
+            language === "vi" ? "Switch to English" : "Chuyển sang tiếng Việt"
+          }
+        >
+          <span className={language === "vi" ? "selected" : ""}>VI</span>
+          <span aria-hidden="true">/</span>
+          <span className={language === "en" ? "selected" : ""}>EN</span>
+        </button>
         <button
           className="mobile-toggle icon-button"
           aria-label={open ? "Đóng menu" : "Mở menu"}
@@ -101,6 +140,17 @@ export function Header({
               <ArrowUpRight size={16} />
             </Link>
           ))}
+          <button
+            className="mobile-language-toggle"
+            type="button"
+            onClick={toggleLanguage}
+            aria-label={
+              language === "vi" ? "Switch to English" : "Chuyển sang tiếng Việt"
+            }
+          >
+            {language === "vi" ? "English" : "Tiếng Việt"}
+            <ArrowUpRight size={16} />
+          </button>
         </nav>
       )}
     </header>
@@ -111,7 +161,7 @@ export function Footer() {
     <footer className="site-footer">
       <Link className="brand" href="/">
         <BrandMark className="brand-mark" size={28} />
-        <span>Việt’s vibe.</span>
+        <span>Viets Vibe.</span>
       </Link>
       <p>Tự hào bản sắc. Tự do thể hiện.</p>
       <span>VIỆT PHỤC REMIX · 2026</span>

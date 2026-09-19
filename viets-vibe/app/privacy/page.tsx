@@ -22,10 +22,10 @@ export default function Privacy() {
         </p>
         <h2>Ảnh tải lên được dùng thế nào?</h2>
         <p>
-          Ảnh chỉ được hiển thị tạm trong phiên làm việc. Khi bạn chọn “Gợi ý
-          sâu hơn cùng Gemini”, ảnh cùng lựa chọn phối đồ được gửi qua máy chủ
-          ứng dụng đến Google Gemini để tạo lời gợi ý. Mã ứng dụng không lưu ảnh
-          vào cơ sở dữ liệu hoặc lookbook.
+          Ảnh chỉ được hiển thị tạm trong phiên làm việc. Khi bạn chọn “Phối lại
+          cùng Gemini”, ảnh cùng lựa chọn phối đồ được gửi qua máy chủ ứng dụng
+          đến Google Gemini để tạo lời gợi ý. Mã ứng dụng không lưu ảnh vào cơ
+          sở dữ liệu hoặc lookbook.
         </p>
         <p>
           Việc Google xử lý dữ liệu tuân theo điều khoản của Google và cấu hình
