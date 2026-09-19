@@ -1,0 +1,33 @@
+name: Verify Viet's Vibe
+on:
+  push:
+    paths: ['viets-vibe/**', '.github/workflows/verify.yml']
+  pull_request:
+    paths: ['viets-vibe/**', '.github/workflows/verify.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: viets-vibe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: viets-vibe/.nvmrc
+          cache: npm
+          cache-dependency-path: viets-vibe/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm run format:check
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: viets-vibe/test-results/
+          retention-days: 7
