@@ -1,5 +1,12 @@
 # Changelog
 
+## Chưa phát hành — 2026-09-20
+
+- Dựng lại mặt và bàn tay; mẫu nam/nữ có kiểu tóc cố định riêng.
+- Chỉnh chiều cao theo thân/chân, giữ kích thước đầu; bổ sung mốc chiều cao nhanh và khung nhìn phù hợp.
+- Bổ sung lụa, đũi, gấm với độ lì/ánh vải, thớ dệt, nếp rủ và ánh sáng studio.
+- Đưa Gemini thành nút phối đồ chính: áp dụng ngay, hiển thị thay đổi, hoàn tác; phân biệt rõ gợi ý cơ bản.
+
 ## 1.1.0 — 2026-09-19
 
 - Studio ma-nơ-canh 3D tự dựng: sáu phom, xoay 360°, zoom, đổi dáng và sắc da.

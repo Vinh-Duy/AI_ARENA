@@ -8,11 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "playwright test",
-    "format": "prettier --write app tests scripts playwright.config.ts next.config.ts README.md docs",
+    "format": "prettier --write app tests scripts playwright.config.ts next.config.ts ../README.md docs",
     "typecheck": "next typegen && tsc --noEmit",
     "check:content": "node scripts/audit-content.mjs",
     "check": "npm run lint && npm run typecheck && npm run check:content",
-    "format:check": "prettier --check app tests scripts playwright.config.ts next.config.ts README.md docs"
+    "format:check": "prettier --check app tests scripts playwright.config.ts next.config.ts ../README.md docs"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",
