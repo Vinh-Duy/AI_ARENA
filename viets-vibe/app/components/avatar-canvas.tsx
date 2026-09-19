@@ -8,6 +8,7 @@ import {
 } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { Download, RotateCcw, Rotate3D, ZoomIn, ZoomOut } from "lucide-react";
 import { buildMannequin, disposeModel } from "../lib/mannequin";
 import type { AvatarConfig } from "../lib/avatar";
@@ -112,7 +113,7 @@ export default function AvatarCanvas({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFSoftShadowMap;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.05;
     renderer.domElement.setAttribute(
       "aria-label",
       "Ma-nơ-canh 3D — kéo để xoay, cuộn để phóng to",
@@ -120,6 +121,13 @@ export default function AvatarCanvas({
     renderer.domElement.setAttribute("role", "img");
     element.appendChild(renderer.domElement);
     const scene = new T.Scene();
+    const room = new RoomEnvironment();
+    const pmrem = new T.PMREMGenerator(renderer);
+    const environment = pmrem.fromScene(room, 0.04);
+    scene.environment = environment.texture;
+    scene.environmentIntensity = 0.55;
+    room.dispose();
+    pmrem.dispose();
     scene.background = new T.Color("#eae6dc");
     scene.fog = new T.Fog("#eae6dc", 7, 18);
     const camera = new T.PerspectiveCamera(34, 1, 0.1, 30);
@@ -133,8 +141,8 @@ export default function AvatarCanvas({
     controls.minPolarAngle = 0.5;
     controls.maxPolarAngle = 1.8;
     controls.autoRotateSpeed = 1.4;
-    scene.add(new T.HemisphereLight("#fff9eb", "#8d8a76", 2.4));
-    const key = new T.DirectionalLight("#fff2da", 3.2);
+    scene.add(new T.HemisphereLight("#fffaf2", "#838a7f", 1.65));
+    const key = new T.DirectionalLight("#fff7ed", 2.5);
     key.position.set(3, 5, 4);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -214,6 +222,7 @@ export default function AvatarCanvas({
       controls.dispose();
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       disposeModel(scene);
+      environment.dispose();
       key.shadow.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
@@ -232,6 +241,18 @@ export default function AvatarCanvas({
     r.scene.add(r.model);
     r.dirty = true;
   }, [garment, color, extras, avatar]);
+  useEffect(() => {
+    const r = runtime.current;
+    if (!r) return;
+    const offset = r.camera.position.clone().sub(r.controls.target);
+    r.controls.target.y = 1.37 + ((avatar.height - 165) / 165) * 1.1;
+    const comfortableDistance = 5.9 * Math.max(1, avatar.height / 165);
+    if (offset.length() < comfortableDistance)
+      offset.setLength(comfortableDistance);
+    r.camera.position.copy(r.controls.target).add(offset);
+    r.controls.update();
+    r.dirty = true;
+  }, [avatar.height]);
   useEffect(() => {
     const r = runtime.current;
     if (!r) return;
@@ -361,6 +382,9 @@ export default function AvatarCanvas({
         data-garment={garment}
         data-build={avatar.build}
         data-skin={avatar.skin}
+        data-presentation={avatar.presentation}
+        data-height={avatar.height}
+        data-fabric={avatar.fabric || "silk"}
         data-backdrop={location.id}
         data-background-ready={loadedBackdrop === location.id}
       >
@@ -462,8 +486,8 @@ export default function AvatarCanvas({
         </p>
       )}
       <p className="reference-note">
-        Mô hình minh họa phom và màu. Chưa mô phỏng chất vải, số đo may hoặc
-        phục dựng lịch sử.
+        Mô hình minh họa phom, màu và bề mặt vải. Chưa mô phỏng chuyển động vải,
+        độ vừa theo số đo hoặc phục dựng lịch sử.
         {location.image && (
           <>
             {" "}

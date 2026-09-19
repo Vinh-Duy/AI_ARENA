@@ -1,5 +1,6 @@
 import * as T from "three";
 import type { AvatarConfig } from "./avatar";
+import { clothMaterial, fitMannequin, sculptHead } from "./mannequin-detail";
 
 // Procedural illustration, not a historical reconstruction or a tailoring model.
 export function buildMannequin(
@@ -11,10 +12,15 @@ export function buildMannequin(
   const root = new T.Group();
   const material = (c: string, roughness = 0.72) =>
     new T.MeshStandardMaterial({ color: c, roughness, side: T.DoubleSide });
-  const skin = material(a.skin),
-    cloth = material(color),
-    lining = material(a.inner),
-    bottom = material(a.bottom),
+  const skin = new T.MeshPhysicalMaterial({
+      color: a.skin,
+      roughness: 0.57,
+      clearcoat: 0.08,
+      clearcoatRoughness: 0.7,
+    }),
+    cloth = clothMaterial(color, a.fabric || "silk"),
+    lining = clothMaterial(a.inner, "silk"),
+    bottom = clothMaterial(a.bottom, a.fabric === "linen" ? "linen" : "silk"),
     trim = material(a.accent, 0.42),
     shoe = material(a.shoes);
   function mesh(
@@ -75,13 +81,20 @@ export function buildMannequin(
     if (rings.length > 2)
       rings = curve.getPoints(36).map((p) => [p.y, p.x, p.z]);
     const positions: number[] = [],
+      uvs: number[] = [],
       indices: number[] = [];
     const n = 64;
     rings.forEach(([y, rx, rz], row) => {
       for (let i = 0; i <= n; i++) {
         const t = start + (span * i) / n;
-        const fold = 1 + Math.sin(t * 16) * pleat * (1 - row / rings.length);
+        const weight = 1 - row / (rings.length - 1);
+        const fold =
+          1 +
+          (Math.sin(t * 12 + y * 0.7) + 0.35 * Math.sin(t * 23 - y)) *
+            pleat *
+            weight;
         positions.push(Math.cos(t) * rx * fold, y, Math.sin(t) * rz * fold);
+        uvs.push(i / n, row / (rings.length - 1));
         if (row && i) {
           const k = row * (n + 1) + i;
           indices.push(k, k - 1, k - n - 2, k, k - n - 2, k - n - 1);
@@ -90,16 +103,17 @@ export function buildMannequin(
     });
     const g = new T.BufferGeometry();
     g.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+    g.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
     g.setIndex(indices);
     g.computeVertexNormals();
     return mesh(g, mat);
   }
-  const feminine = a.presentation === "feminine";
+  const feminine = a.presentation !== "masculine";
   const shoulder =
     a.presentation === "masculine" ? 0.37 : feminine ? 0.3 : 0.335;
   const waist = feminine ? 0.215 : 0.255;
   // Mannequin: calm head, neck, arms and complete underbody, with no gender gating of garments.
-  oval(skin, 0, 2.38, 0, 0.155, 0.205, 0.145);
+  root.add(sculptHead(skin, feminine));
   bar(skin, [0, 2.03, 0], [0, 2.24, 0], 0.079);
   const torso = fabric(skin, [
     [1.03, 0.26, 0.15],
@@ -112,13 +126,39 @@ export function buildMannequin(
     bar(skin, [side * 0.14, 0.2, 0], [side * 0.15, 1.11, 0], 0.065, 0.12);
     bar(
       skin,
-      [side * shoulder, 1.94, 0],
+      [side * shoulder, 1.87, 0],
       [side * 0.53, 1.25, 0.03],
-      0.085,
-      0.058,
+      0.062,
+      0.042,
     );
-    oval(skin, side * 0.535, 1.18, 0.035, 0.06, 0.11, 0.045);
-    const foot = oval(shoe, side * 0.14, 0.125, 0.067, 0.09, 0.073, 0.175);
+    oval(skin, side * 0.535, 1.195, 0.035, 0.044, 0.074, 0.025);
+    for (let finger = 0; finger < 4; finger++) {
+      const x = side * (0.509 + finger * 0.015);
+      bar(
+        skin,
+        [x, 1.16, 0.041],
+        [x + side * 0.008, 1.079 + Math.abs(1.5 - finger) * 0.014, 0.054],
+        0.008,
+        0.006,
+      );
+      oval(
+        skin,
+        x + side * 0.008,
+        1.079 + Math.abs(1.5 - finger) * 0.014,
+        0.054,
+        0.006,
+        0.008,
+        0.006,
+      );
+    }
+    bar(
+      skin,
+      [side * 0.505, 1.2, 0.047],
+      [side * 0.486, 1.144, 0.069],
+      0.013,
+      0.008,
+    );
+    const foot = oval(shoe, side * 0.14, 0.105, 0.067, 0.081, 0.055, 0.162);
     if (a.footwear === "sneakers") {
       oval(lining, side * 0.14, 0.084, 0.07, 0.096, 0.028, 0.183);
       for (let j = 0; j < 3; j++)
@@ -145,11 +185,18 @@ export function buildMannequin(
     );
   else
     for (const side of [-1, 1]) {
-      const leg = fabric(bottom, [
-        [0.21, 0.12, 0.115],
-        [0.7, 0.13, 0.125],
-        [1.16, 0.14, 0.15],
-      ]);
+      const leg = fabric(
+        bottom,
+        [
+          [0.165, 0.12, 0.115],
+          [0.52, 0.117, 0.115],
+          [0.78, 0.125, 0.12],
+          [1.16, 0.14, 0.15],
+        ],
+        0,
+        Math.PI * 2,
+        0.023,
+      );
       leg.position.x = side * 0.142;
     }
   const underlayer = fabric(lining, [
@@ -180,8 +227,8 @@ export function buildMannequin(
     ];
     if (open) fabric(cloth, skirtRings, Math.PI * 0.64, Math.PI * 1.72, 0.025);
     else {
-      fabric(cloth, skirtRings, 0.08, Math.PI - 0.16, 0.017);
-      fabric(cloth, skirtRings, Math.PI + 0.08, Math.PI - 0.16, 0.017);
+      fabric(cloth, skirtRings, 0.045, Math.PI - 0.09, 0.033);
+      fabric(cloth, skirtRings, Math.PI + 0.045, Math.PI - 0.09, 0.033);
     }
   } else
     fabric(cloth, [
@@ -190,16 +237,16 @@ export function buildMannequin(
     ]);
   for (const side of [-1, 1]) {
     // Flared ceremonial sleeves, or fitted everyday sleeves, follow the same arm pose.
-    const start = [side * (shoulder - 0.01), 1.89, 0];
+    const start = [side * (shoulder - 0.015), 1.875, 0];
     const end = [side * 0.51, 1.31, 0.015];
     oval(
       cloth,
-      side * (shoulder - 0.015),
-      1.87,
+      side * (shoulder - 0.025),
+      1.885,
       0,
-      wide ? 0.19 : 0.123,
-      0.17,
-      wide ? 0.19 : 0.125,
+      wide ? 0.17 : 0.12,
+      0.135,
+      wide ? 0.165 : 0.119,
     );
     const sleeve = bar(
       cloth,
@@ -209,14 +256,33 @@ export function buildMannequin(
       wide ? 0.225 : 0.078,
     );
     const oldGeometry = sleeve.geometry;
+    const length = new T.Vector3(...end).distanceTo(new T.Vector3(...start));
     sleeve.geometry = new T.CylinderGeometry(
-      wide ? 0.225 : 0.078,
-      wide ? 0.19 : 0.109,
-      new T.Vector3(...end).distanceTo(new T.Vector3(...start)),
-      40,
-      1,
+      wide ? 0.225 : 0.067,
+      wide ? 0.17 : 0.118,
+      length,
+      48,
+      20,
       true,
     );
+    const sleevePositions = sleeve.geometry.attributes.position;
+    for (let i = 0; i < sleevePositions.count; i++) {
+      const y = sleevePositions.getY(i),
+        t = (y + length / 2) / length;
+      const angle = Math.atan2(
+        sleevePositions.getZ(i),
+        sleevePositions.getX(i),
+      );
+      const fold =
+        1 + Math.sin(angle * 8 + t * 2) * 0.045 * Math.sin(Math.PI * t);
+      sleevePositions.setXYZ(
+        i,
+        sleevePositions.getX(i) * fold,
+        y,
+        sleevePositions.getZ(i) * fold,
+      );
+    }
+    sleeve.geometry.computeVertexNormals();
     oldGeometry.dispose();
     if (id === "nhat-binh")
       for (let i = 0; i < 3; i++) {
@@ -339,11 +405,7 @@ export function buildMannequin(
       fan.add(rib);
     }
   }
-  root.scale.set(
-    a.build === "slim" ? 0.87 : a.build === "broad" ? 1.17 : 1,
-    a.height / 165,
-    a.build === "broad" ? 1.1 : 1,
-  );
+  fitMannequin(root, a);
   return root;
 }
 export function disposeModel(group: T.Object3D) {
@@ -356,5 +418,11 @@ export function disposeModel(group: T.Object3D) {
       );
     }
   });
-  materials.forEach((m) => m.dispose());
+  const textures = new Set<T.Texture>();
+  materials.forEach((m) => {
+    for (const value of Object.values(m))
+      if (value instanceof T.Texture) textures.add(value);
+    m.dispose();
+  });
+  textures.forEach((t) => t.dispose());
 }

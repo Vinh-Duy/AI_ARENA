@@ -17,10 +17,11 @@ export type AvatarConfig = {
   bottomType: "trousers" | "skirt";
   footwear: "flats" | "sneakers";
   collar: boolean;
+  fabric?: "silk" | "linen" | "brocade";
 };
 export const defaultAvatar: AvatarConfig = {
   build: "regular",
-  presentation: "neutral",
+  presentation: "feminine",
   height: 165,
   skin: skinTones[1],
   inner: "#f4e8ce",
@@ -30,6 +31,7 @@ export const defaultAvatar: AvatarConfig = {
   bottomType: "trousers",
   footwear: "flats",
   collar: true,
+  fabric: "silk",
 };
 const hex = (v: unknown): v is string =>
   typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v);
@@ -45,7 +47,8 @@ export function validAvatar(v: unknown): v is AvatarConfig {
     [a.skin, a.inner, a.bottom, a.accent, a.shoes].every(hex) &&
     ["trousers", "skirt"].includes(a.bottomType) &&
     ["flats", "sneakers"].includes(a.footwear) &&
-    typeof a.collar === "boolean"
+    typeof a.collar === "boolean" &&
+    (a.fabric === undefined || ["silk", "linen", "brocade"].includes(a.fabric))
   );
 }
 export function avatarFromQuery(value: string | null): AvatarConfig {

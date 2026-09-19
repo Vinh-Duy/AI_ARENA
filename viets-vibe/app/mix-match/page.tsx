@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useDeferredValue, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -59,6 +59,7 @@ function Studio() {
     avatarFromQuery(params.get("avatar")),
   );
   const avatarRef = useRef<AvatarHandle>(null);
+  const renderedAvatar = useDeferredValue(avatar);
   const [controlTab, setControlTab] = useState("outfit");
   const [garmentId, setGarmentId] = useState(
     () => garments.find((g) => g.id === params.get("garment"))?.id || "ao-dai",
@@ -123,6 +124,8 @@ function Studio() {
     changed();
   }
   function compose() {
+    setApplied(false);
+    setPreviousOutfit(null);
     const vibeTip: Record<string, string> = {
       "Thanh lịch":
         "Chọn giày bệt hoặc loafer trơn, ưu tiên đường nét gọn và phụ kiện nhỏ.",
@@ -195,6 +198,7 @@ function Studio() {
             bottomType: avatar.bottomType,
             footwear: avatar.footwear,
             collar: avatar.collar,
+            fabric: avatar.fabric || "silk",
           },
           imageBase64,
           mimeType: file?.type,
@@ -209,8 +213,31 @@ function Studio() {
       setResult(data.suggestion);
       setResultSource("GỢI Ý TỪ GOOGLE GEMINI");
       setSaved(false);
-      setApplied(false);
-      setPreviousOutfit(null);
+      if (data.suggestion.bản_phối) {
+        setPreviousOutfit({
+          garment: garmentId,
+          color: colorName,
+          accessories: [...extras],
+          layers: {
+            inner: avatar.inner,
+            bottom: avatar.bottom,
+            accent: avatar.accent,
+            shoes: avatar.shoes,
+            bottomType: avatar.bottomType,
+            footwear: avatar.footwear,
+            collar: avatar.collar,
+            fabric: avatar.fabric || "silk",
+          },
+        });
+        applyOutfit(data.suggestion.bản_phối);
+        setApplied(true);
+        setMessage(
+          "Gemini đã phối lại trực tiếp trên người mẫu. Bạn có thể hoàn tác ở thẻ stylist.",
+        );
+      } else {
+        setApplied(false);
+        setPreviousOutfit(null);
+      }
     } catch (error) {
       setMessage(
         error instanceof Error && error.name === "TimeoutError"
@@ -524,13 +551,19 @@ function Studio() {
               </label>
               <button
                 className="button button-primary full-button"
-                onClick={compose}
+                onClick={askGemini}
+                disabled={busy}
               >
-                Tạo bản phối của tôi <ArrowUpRight size={18} />
+                {busy ? (
+                  <LoaderCircle size={18} className="spin" />
+                ) : (
+                  <Sparkles size={18} />
+                )}
+                {busy ? "Gemini đang phối đồ…" : "Phối lại cùng Gemini"}
               </button>
               <button
                 className="gemini-button"
-                onClick={askGemini}
+                onClick={compose}
                 disabled={busy}
               >
                 {busy ? (
@@ -538,13 +571,12 @@ function Studio() {
                 ) : (
                   <Sparkles size={17} />
                 )}
-                {busy
-                  ? "Gemini đang tìm cảm hứng…"
-                  : "Gợi ý sâu hơn cùng Gemini"}
+                Xem gợi ý cơ bản
               </button>
               <p className="upload-note">
-                AI tư vấn cả bộ: áo, bảng màu, quần/váy, giày và phụ kiện. Bạn
-                xem rồi chọn áp dụng.
+                Gemini đổi bản phối ngay trên người mẫu: màu, chất liệu,
+                quần/váy, giày và phụ kiện. Có thể hoàn tác; gợi ý cơ bản không
+                gọi AI.
               </p>
             </fieldset>
           </section>
@@ -614,7 +646,7 @@ function Studio() {
               garment={garmentId}
               color={color.hex}
               extras={extras}
-              avatar={avatar}
+              avatar={renderedAvatar}
               backdrop={backdropId}
             />
             {result?.bản_phối && (
@@ -625,7 +657,11 @@ function Studio() {
                 <span className="eyebrow">
                   <BrandMark size={18} /> GOOGLE GEMINI / STYLIST CỦA BẠN
                 </span>
-                <h2>Một tổng thể có chủ ý.</h2>
+                <h2>
+                  {applied
+                    ? "Bản phối mới đang trên người mẫu."
+                    : "Thử một cách phối khác."}
+                </h2>
                 <p>{result.nhận_xét}</p>
                 <p>{result.lý_do}</p>
                 <div className="proposal-palette">
@@ -653,7 +689,39 @@ function Studio() {
                     ? "Sneaker"
                     : "Giày bệt"}{" "}
                   · {result.bản_phối.accessories.join(", ") || "Không phụ kiện"}
+                  {" · "}
+                  {
+                    { silk: "Lụa", linen: "Đũi", brocade: "Gấm" }[
+                      result.bản_phối.layers.fabric || "silk"
+                    ]
+                  }
                 </p>
+                {previousOutfit && (
+                  <ul className="outfit-changes">
+                    <li>
+                      Màu áo: {previousOutfit.color} → {result.bản_phối.color}
+                    </li>
+                    <li>
+                      Chất liệu:{" "}
+                      {
+                        { silk: "Lụa", linen: "Đũi", brocade: "Gấm" }[
+                          previousOutfit.layers.fabric || "silk"
+                        ]
+                      }{" "}
+                      →{" "}
+                      {
+                        { silk: "Lụa", linen: "Đũi", brocade: "Gấm" }[
+                          result.bản_phối.layers.fabric || "silk"
+                        ]
+                      }
+                    </li>
+                    <li>
+                      Phụ kiện:{" "}
+                      {previousOutfit.accessories.join(", ") || "Không"} →{" "}
+                      {result.bản_phối.accessories.join(", ") || "Không"}
+                    </li>
+                  </ul>
+                )}
                 <div className="look-actions">
                   <button
                     className="button button-primary"
@@ -671,6 +739,7 @@ function Studio() {
                           bottomType: avatar.bottomType,
                           footwear: avatar.footwear,
                           collar: avatar.collar,
+                          fabric: avatar.fabric || "silk",
                         },
                       });
                       applyOutfit(result.bản_phối!);

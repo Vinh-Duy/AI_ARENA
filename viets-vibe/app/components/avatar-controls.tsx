@@ -18,19 +18,22 @@ export function AvatarControls({
         </summary>
         <div className="avatar-inputs">
           <label>
-            Dáng trình bày
+            Mẫu người
             <select
               aria-label="Dáng trình bày"
-              value={value.presentation}
+              value={
+                value.presentation === "neutral"
+                  ? "feminine"
+                  : value.presentation
+              }
               onChange={(e) =>
                 patch({
                   presentation: e.target.value as AvatarConfig["presentation"],
                 })
               }
             >
-              <option value="neutral">Trung tính</option>
-              <option value="feminine">Nữ tính</option>
-              <option value="masculine">Nam tính</option>
+              <option value="feminine">Nữ · tóc búi thấp</option>
+              <option value="masculine">Nam · tóc ngắn rẽ ngôi</option>
             </select>
           </label>
           <label>
@@ -57,7 +60,28 @@ export function AvatarControls({
               value={value.height}
               onChange={(e) => patch({ height: Number(e.target.value) })}
             />
+            <span className="height-ticks">
+              <span>150 cm</span>
+              <span>170 cm</span>
+              <span>190 cm</span>
+            </span>
           </label>
+          <div
+            className="height-presets"
+            role="group"
+            aria-label="Chiều cao nhanh"
+          >
+            {[155, 165, 175, 185].map((height) => (
+              <button
+                type="button"
+                key={height}
+                aria-pressed={value.height === height}
+                onClick={() => patch({ height })}
+              >
+                {height} cm
+              </button>
+            ))}
+          </div>
           <div className="skin-control">
             <span>Sắc da</span>
             <div>
@@ -73,7 +97,10 @@ export function AvatarControls({
             </div>
           </div>
         </div>
-        <p>Mọi trang phục đều có thể thử trên mọi dáng người.</p>
+        <p>
+          Tóc cố định theo mẫu. Chiều cao thay đổi tỉ lệ thân và chân, giữ phom
+          đầu. Mọi trang phục đều có thể thử trên cả hai mẫu.
+        </p>
       </details>
       <details open className="studio-disclosure">
         <summary>
@@ -81,6 +108,20 @@ export function AvatarControls({
           <b>02 / Các lớp trang phục</b>
         </summary>
         <div className="avatar-inputs">
+          <label className="fabric-select">
+            Chất liệu bề mặt
+            <select
+              aria-label="Chất liệu bề mặt"
+              value={value.fabric || "silk"}
+              onChange={(e) =>
+                patch({ fabric: e.target.value as AvatarConfig["fabric"] })
+              }
+            >
+              <option value="silk">Lụa · mềm, ánh nhẹ</option>
+              <option value="linen">Đũi · thớ mộc, lì</option>
+              <option value="brocade">Gấm · vân dệt nổi</option>
+            </select>
+          </label>
           <label>
             Lớp thân dưới
             <select
@@ -138,6 +179,10 @@ export function AvatarControls({
           />{" "}
           Giữ chi tiết cổ áo
         </label>
+        <p>
+          Bề mặt và nếp rủ được minh họa bằng ánh sáng 3D; chưa mô phỏng chuyển
+          động vải hay độ vừa theo số đo.
+        </p>
       </details>
     </div>
   );
