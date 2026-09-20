@@ -1,17 +1,14 @@
 "use client";
-import {
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  type Ref,
-} from "react";
+import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { Download, RotateCcw, Rotate3D, ZoomIn, ZoomOut } from "lucide-react";
 import { buildMannequin, disposeModel } from "../lib/mannequin";
-import type { AvatarConfig } from "../lib/avatar";
+import type {
+  CharacterHandle,
+  CharacterProps,
+} from "../lib/character-registry";
 import { findBackdrop } from "../lib/backdrops";
 import { translateText } from "../lib/i18n";
 
@@ -24,15 +21,9 @@ function fitBackground(texture: T.Texture, aspect: number) {
   );
   texture.offset.set((1 - texture.repeat.x) / 2, (1 - texture.repeat.y) / 2);
 }
-export type AvatarHandle = { thumbnail: () => string | undefined };
-type Props = {
-  garment: string;
-  color: string;
-  extras: string[];
-  avatar: AvatarConfig;
-  ref?: Ref<AvatarHandle>;
-  backdrop?: string;
-};
+// Compatibility alias for callers that used the original canvas handle.
+export type AvatarHandle = CharacterHandle;
+type Props = CharacterProps;
 export default function AvatarCanvas({
   garment,
   color,
@@ -126,7 +117,7 @@ export default function AvatarCanvas({
     const pmrem = new T.PMREMGenerator(renderer);
     const environment = pmrem.fromScene(room, 0.04);
     scene.environment = environment.texture;
-    scene.environmentIntensity = 0.55;
+    scene.environmentIntensity = 0.45;
     room.dispose();
     pmrem.dispose();
     scene.background = new T.Color("#eae6dc");
@@ -143,7 +134,7 @@ export default function AvatarCanvas({
     controls.maxPolarAngle = 1.8;
     controls.autoRotateSpeed = 1.4;
     scene.add(new T.HemisphereLight("#fffaf2", "#838a7f", 1.65));
-    const key = new T.DirectionalLight("#fff7ed", 2.5);
+    const key = new T.DirectionalLight("#fff7ed", 2.2);
     key.position.set(3, 5, 4);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -153,7 +144,7 @@ export default function AvatarCanvas({
     key.shadow.camera.bottom = -3;
     key.shadow.normalBias = 0.025;
     scene.add(key);
-    const rim = new T.DirectionalLight("#dceaf1", 2);
+    const rim = new T.DirectionalLight("#e5efdf", 1.3);
     rim.position.set(-3, 3, -2);
     scene.add(rim);
     const plinth = new T.Mesh(

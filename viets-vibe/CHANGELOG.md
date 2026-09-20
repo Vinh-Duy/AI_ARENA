@@ -2,6 +2,10 @@
 
 ## Chưa phát hành — 2026-09-20
 
+- Renderer dùng chung 2D/3D, mặc định 2D; giữ cấu hình và chỉ tải Three.js khi chọn 3D.
+- Minh họa 2D nhiều lớp cho sáu loại áo, năm phụ kiện; xuất PNG và thumbnail lookbook từ cùng bản phối.
+- Registry artwork, thư mục asset và tài liệu thay ảnh, biến thể màu; fallback khi chưa có file hoặc tải lỗi.
+
 - Thêm nón lá 3D với vành tre, quai; hỗ trợ chọn, lưu, chia sẻ và gợi ý AI.
 - Bổ sung bản dịch tiếng Anh cho nội dung, điều khiển, trạng thái động và ảnh xuất; giữ nguyên giá trị bản phối khi chuyển ngôn ngữ.
 - Gemini trả lời theo ngôn ngữ đang chọn; thử model Google dự phòng khi model chính bận hoặc hết thời gian.

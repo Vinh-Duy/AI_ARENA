@@ -2,19 +2,15 @@
 import { Suspense, useDeferredValue, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import CharacterRenderer from "../components/character-renderer";
 import { AvatarControls } from "../components/avatar-controls";
-import type { AvatarHandle } from "../components/avatar-canvas";
+import type { CharacterHandle } from "../lib/character-registry";
 import {
   avatarFromQuery,
   defaultAvatar,
   culturalChecks,
   paletteHarmony,
 } from "../lib/avatar";
-const AvatarCanvas = dynamic(() => import("../components/avatar-canvas"), {
-  ssr: false,
-  loading: () => <div className="avatar-loading">Đang tải phòng thử 3D…</div>,
-});
 import Image from "next/image";
 import {
   ArrowUpRight,
@@ -65,7 +61,7 @@ function Studio() {
   const [avatar, setAvatar] = useState(() =>
     avatarFromQuery(params.get("avatar")),
   );
-  const avatarRef = useRef<AvatarHandle>(null);
+  const avatarRef = useRef<CharacterHandle>(null);
   const renderedAvatar = useDeferredValue(avatar);
   const [controlTab, setControlTab] = useState("outfit");
   const [garmentId, setGarmentId] = useState(
@@ -210,7 +206,7 @@ function Studio() {
           },
           imageBase64,
           mimeType: file?.type,
-          imageDescription: `Mockup 3D: lớp dưới ${avatar.bottomType}, giày ${avatar.footwear}, màu trong ${avatar.inner}, màu dưới ${avatar.bottom}, màu phụ kiện ${avatar.accent}, giữ cổ áo ${avatar.collar}. Lưu ý: ${warnings.map((w) => w.title).join("; ")}.`,
+          imageDescription: `Bản phối minh họa: lớp dưới ${avatar.bottomType}, giày ${avatar.footwear}, màu trong ${avatar.inner}, màu dưới ${avatar.bottom}, màu phụ kiện ${avatar.accent}, giữ cổ áo ${avatar.collar}. Lưu ý: ${warnings.map((w) => w.title).join("; ")}.`,
         }),
       });
       const data = await response.json();
@@ -316,7 +312,7 @@ function Studio() {
         <Reveal>
           <div className="studio-heading">
             <div>
-              <span className="eyebrow">THE REMIX STUDIO / 3D</span>
+              <span className="eyebrow">THE REMIX STUDIO / 2D + 3D</span>
               <h1>
                 Hôm nay, bạn <em>mặc gì?</em>
               </h1>
@@ -329,7 +325,7 @@ function Studio() {
           </div>
         </Reveal>
         <nav className="mobile-studio-jump" aria-label="Di chuyển trong studio">
-          <a href="#studio-canvas">Xem mô hình 3D ↑</a>
+          <a href="#studio-canvas">Xem bản phối ↑</a>
           <a href="#studio-controls">Chọn & chỉnh đồ ↓</a>
         </nav>
         <div className="studio-layout">
@@ -651,7 +647,7 @@ function Studio() {
               </div>
               <p>{backdrop.description}</p>
             </div>
-            <AvatarCanvas
+            <CharacterRenderer
               ref={avatarRef}
               garment={garmentId}
               color={color.hex}
@@ -893,8 +889,8 @@ function Studio() {
                 </ul>
               ) : (
                 <p className="muted">
-                  Mô hình 3D cập nhật ngay theo lựa chọn. Nhấn “Tạo bản phối của
-                  tôi” để thêm thẻ gợi ý, hoặc lưu ngay mockup vào lookbook.
+                  Bản phối cập nhật ngay theo lựa chọn. Dùng Gemini để nhận tư
+                  vấn, hoặc lưu ngay bản phối vào lookbook.
                 </p>
               )}
               <div className="look-actions">

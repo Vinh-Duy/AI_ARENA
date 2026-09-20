@@ -25,6 +25,7 @@ test("English covers pages and dynamic controls without changing stored outfit v
     );
   }
   await page.goto("/mix-match?extras=");
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Conical hat", exact: true }),
   ).toBeVisible();

@@ -3,6 +3,10 @@ export type Language = "vi" | "en";
 
 const translations: Record<string, string> = {
   ...extra,
+  "Bản phối cập nhật ngay theo lựa chọn. Dùng Gemini để nhận tư vấn, hoặc lưu ngay bản phối vào lookbook.":
+    "Your look updates as you choose. Ask Gemini for styling advice, or save your look directly to your lookbook.",
+  "Xem bản phối ↑": "View your look ↑",
+  "Bản phối cập nhật ngay theo lựa chọn.": "Your look updates as you choose.",
   "theo cách của bạn.": "your way.",
   "Việt phục": "Vietnamese traditional dress",
   "Gemini đang bận. Bạn có thể thử lại sau hoặc dùng gợi ý cơ bản.":

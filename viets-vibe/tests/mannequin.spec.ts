@@ -37,6 +37,7 @@ test("fixed male and female models, stature and fabric stay visible in the studi
   page,
 }) => {
   await page.goto("/mix-match?garment=ao-dai&extras=");
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   const stage = page.locator(".avatar-stage");
   await expect(stage).toHaveAttribute("data-ready", "true");
   await page
@@ -74,6 +75,7 @@ test("fixed male and female models, stature and fabric stay visible in the studi
     .click();
   await page.goto("/lookbook");
   await page.getByRole("link", { name: "Phối tiếp" }).click();
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(stage).toHaveAttribute("data-fabric", "brocade");
   await expect(stage).toHaveAttribute("data-presentation", "masculine");
 });

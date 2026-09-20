@@ -1190,19 +1190,30 @@ svg {
 .garment-option {
   position: relative;
   background: transparent;
-  padding: 4px 4px 9px;
+  padding: 5px 5px 11px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 10px;
   color: #6d7164;
-  transition: border-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+.garment-option:hover {
+  border-color: #91a68a;
+  box-shadow: 0 4px 16px #39583a12;
+}
+.garment-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 .garment-option > span {
   height: 83px;
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 6px;
   margin-bottom: 8px;
 }
 .garment-option > span img {
@@ -1212,6 +1223,9 @@ svg {
   border-color: var(--accent);
   background: #e6f0e5;
   color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 5px 16px #35583c12;
 }
 .garment-option > i {
   position: absolute;
@@ -3747,6 +3761,216 @@ svg {
 }
 .collar-toggle input {
   accent-color: #657551;
+}
+.character-viewer {
+  border: 1px solid #dce1d3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fafaf4;
+  box-shadow: 0 18px 60px -38px #263d2e55;
+}
+.character-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 26px;
+  border-bottom: 1px solid #dde2d5;
+}
+.character-viewer-header .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+.character-viewer-header p {
+  margin: 7px 0 0;
+  color: #737c6a;
+  font-size: 12px;
+}
+.character-mode-switch {
+  display: flex;
+  padding: 4px;
+  gap: 3px;
+  border: 1px solid #d8dfd0;
+  border-radius: 12px;
+  background: #eff2e9;
+  flex-shrink: 0;
+}
+.character-mode-switch button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6a7562;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+.character-mode-switch button[aria-pressed="true"] {
+  background: #294b38;
+  color: #fffdf0;
+  box-shadow: 0 3px 8px #26443122;
+}
+.character-mode-switch button:focus-visible {
+  outline: 2px solid #47805c;
+  outline-offset: 3px;
+}
+.character-viewer .avatar-workspace {
+  border: 0;
+  border-radius: 0;
+}
+.character-art-stage {
+  height: 760px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #e8e8dc;
+}
+.character-illustration {
+  position: absolute;
+  inset: 0;
+  animation: character-arrive 0.45s ease both;
+}
+.character-illustration svg {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+.character-art-caption {
+  position: absolute;
+  z-index: 2;
+  left: 28px;
+  top: 25px;
+  pointer-events: none;
+}
+.character-art-caption > span {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: #7f8974;
+}
+.character-art-caption h2 {
+  font:
+    400 clamp(19px, 2vw, 25px)/1.2 var(--font-heading),
+    Georgia,
+    serif;
+  color: #425640;
+  margin: 10px 0 8px;
+  max-width: 220px;
+}
+.character-art-caption p {
+  font-size: 10px;
+  color: #7b826f;
+  margin: 0;
+}
+.character-edition {
+  position: absolute;
+  z-index: 2;
+  top: 30px;
+  right: 24px;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: #7d8774;
+  writing-mode: vertical-rl;
+}
+.character-art-footer {
+  position: absolute;
+  bottom: 18px;
+  left: 25px;
+  right: 25px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  color: #74806b;
+  font-size: 9px;
+}
+.character-art-footer span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 0.12em;
+}
+.character-export {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 19px 25px;
+  border-top: 1px solid #dde2d5;
+}
+.character-export p {
+  font:
+    italic 15px var(--font-heading),
+    Georgia,
+    serif;
+  color: #68735c;
+  margin: 0;
+}
+.character-export button {
+  font-size: 12px;
+}
+.character-2d .reference-note {
+  margin: 0;
+  padding: 0 25px 20px;
+}
+.character-2d .export-notice {
+  padding: 0 25px 15px;
+}
+@keyframes character-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.994);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 700px) {
+  .character-viewer-header {
+    padding: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .character-mode-switch {
+    margin-left: auto;
+  }
+  .character-mode-switch button {
+    padding: 9px 11px;
+  }
+  .character-art-stage {
+    height: 660px;
+  }
+  .character-art-caption {
+    left: 18px;
+    top: 20px;
+  }
+  .character-art-caption h2 {
+    max-width: 145px;
+    font-size: 20px;
+  }
+  .character-art-caption p {
+    display: none;
+  }
+  .character-export {
+    padding: 17px;
+  }
+  .character-export p {
+    max-width: 120px;
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-illustration {
+    animation: none;
+  }
+  .character-mode-switch button {
+    transition: none;
+  }
 }
 .avatar-workspace {
   border: 1px solid #deddd2;

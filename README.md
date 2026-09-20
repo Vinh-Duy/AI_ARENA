@@ -2,7 +2,7 @@
 
 > **Nếp xưa. Chất mới.**
 
-Viets Vibe là một trải nghiệm khám phá và phối Việt phục dành cho thế hệ trẻ. Người dùng có thể tìm hiểu câu chuyện phía sau từng trang phục, tự tạo bản phối trong studio 3D, nhận gợi ý từ Gemini và lưu lại lookbook cá nhân.
+Viets Vibe là một trải nghiệm khám phá và phối Việt phục dành cho thế hệ trẻ. Người dùng có thể tìm hiểu câu chuyện phía sau từng trang phục, tự tạo bản phối trong studio 2D/3D, nhận gợi ý từ Gemini và lưu lại lookbook cá nhân.
 
 ![Studio Viets Vibe](viets-vibe/docs/images/studio.png)
 
@@ -26,6 +26,8 @@ Việt phục thường khó tiếp cận khi thông tin bị tách rời khỏi
 
 - Ma-nơ-canh Three.js xoay 360 độ với góc trước, bên và sau.
 - Tùy chỉnh dáng, chiều cao minh họa, sắc da, màu từng lớp, giày và phụ kiện.
+- Mặc định xem minh họa 2D nhiều lớp, chuyển **2D View / 3D View** mà giữ nguyên lựa chọn.
+- Registry đủ sáu phom và năm phụ kiện; xem [hướng dẫn thay artwork](viets-vibe/docs/CHARACTER-RENDERER.md).
 - Mẫu nam tóc ngắn rẽ ngôi, mẫu nữ tóc búi thấp; đầu và tóc giữ tỉ lệ khi đổi chiều cao.
 - Bề mặt lụa, đũi và gấm có thớ dệt, nếp rủ minh họa.
 - Nón lá 3D có vành tre và quai, lưu cùng bản phối.

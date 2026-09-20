@@ -100,7 +100,11 @@ URL chia sẻ chứa lựa chọn, không chứa ảnh và nguyên văn lời g�
 
 Không có user account, database, rate limiter dùng chung hoặc phân quyền. Trước khi mở public với key trả phí, bổ sung giới hạn request ở gateway và ngân sách Google project. Đánh giá độ đúng văn hóa bằng kiểm thử nội dung và người biên tập, không chỉ dựa vào schema hoặc test UI.
 
-## Canvas 3D và cấu hình bản phối
+## Renderer 2D/3D và cấu hình bản phối
+
+Studio dùng `CharacterRenderer` làm giao diện chung, mặc định 2D. `Character2D` dựng các lớp SVG dự phòng, có thể thay bằng raster được khai báo trong registry; xuất PNG/thumbnail từ cùng composition. 3D được tải động khi chọn. Chuyển mode không thay cấu hình áo, màu hoặc avatar. Xem [hướng dẫn renderer và asset](CHARACTER-RENDERER.md).
+
+### Canvas 3D
 
 `lib/mannequin-detail.ts` dựng mặt, tai, tóc búi thấp cho nữ/tóc ngắn rẽ ngôi cho nam. Chiều cao được phân bố vào chân và thân theo từng vùng, không dùng scale toàn mô hình nên đầu và bàn chân giữ kích thước. `useDeferredValue` tách cập nhật nhãn slider khỏi dựng mesh. Camera giữ toàn thân trong khung khi tăng chiều cao. Giá trị `neutral` trong bản lưu cũ vẫn đọc được và dùng kiểu tóc nữ mặc định.
 

@@ -4,6 +4,7 @@ test("Hanoi backdrops export and persist with an applicable AI outfit", async ({
   page,
 }) => {
   await page.goto("/mix-match?garment=ao-dai");
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(page.locator(".avatar-stage")).toHaveAttribute(
     "data-ready",
     "true",
@@ -108,6 +109,7 @@ test("Hanoi backdrops export and persist with an applicable AI outfit", async ({
     /^data:image\/jpeg/,
   );
   await page.getByRole("link", { name: "Phối tiếp" }).click();
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(page.locator(".avatar-stage")).toHaveAttribute(
     "data-backdrop",
     "van-mieu",
@@ -135,6 +137,7 @@ test("broken backdrop and malformed AI plan fail without changing the outfit", a
     route.abort(),
   );
   await page.goto("/mix-match?backdrop=ho-guom");
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(page.getByRole("status")).toContainText(
     "Chưa tải được phông ảnh",
   );
@@ -339,6 +342,7 @@ test("customization, local generation, save, reload and delete", async ({
   await page.getByText("Xem gợi ý đã lưu").click();
   await expect(page.locator(".saved-card")).toContainText("sneaker");
   await page.getByRole("link", { name: "Phối tiếp" }).click();
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Đỏ son", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -593,6 +597,7 @@ test("3D avatar renders, reacts, rotates, exports and restores its lookbook", as
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/mix-match?garment=tu-than");
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   const stage = page.locator(".avatar-stage");
   await expect(stage).toHaveAttribute("data-ready", "true");
   await expect(page.locator(".cultural-warning")).toContainText(
@@ -646,6 +651,7 @@ test("3D avatar renders, reacts, rotates, exports and restores its lookbook", as
     /^data:image\/jpeg;base64,/,
   );
   await page.getByRole("link", { name: "Phối tiếp" }).click();
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(stage).toHaveAttribute("data-ready", "true");
   await page
     .getByRole("button", { name: "Người mẫu & lớp", exact: true })
@@ -698,6 +704,7 @@ test("unavailable WebGL keeps the studio usable without a fake 3D export", async
     } as typeof original;
   });
   await page.goto("/mix-match");
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(page.locator(".canvas-fallback")).toContainText(
     "Thiết bị chưa mở được 3D",
   );
@@ -714,6 +721,7 @@ test("six 3D silhouettes render and malformed avatar links use safe defaults", a
   await page.goto(
     "/mix-match?avatar=" + encodeURIComponent('{"build":"giant","skin":"bad"}'),
   );
+  await page.getByRole("button", { name: "3D View", exact: true }).click();
   await expect(page.locator(".avatar-stage")).toHaveAttribute(
     "data-ready",
     "true",
