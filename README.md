@@ -28,6 +28,8 @@ Việt phục thường khó tiếp cận khi thông tin bị tách rời khỏi
 - Tùy chỉnh dáng, chiều cao minh họa, sắc da, màu từng lớp, giày và phụ kiện.
 - Mẫu nam tóc ngắn rẽ ngôi, mẫu nữ tóc búi thấp; đầu và tóc giữ tỉ lệ khi đổi chiều cao.
 - Bề mặt lụa, đũi và gấm có thớ dệt, nếp rủ minh họa.
+- Nón lá 3D có vành tre và quai, lưu cùng bản phối.
+- Giao diện Việt/Anh, bao gồm điều khiển studio và lời tư vấn theo ngôn ngữ đang chọn.
 - Zoom, tự xoay, tải ảnh PNG và xem gợi ý phối màu có giải thích.
 
 ### Stylist AI
@@ -71,6 +73,7 @@ Mở `viets-vibe/.env.local` và điền key từ [Google AI Studio](https://ais
 ```env
 GEMINI_API_KEY=your_google_ai_studio_key
 GEMINI_MODEL=gemini-flash-latest
+GEMINI_FALLBACK_MODEL=gemini-flash-lite-latest
 ```
 
 Sau khi thay đổi biến môi trường, khởi động lại server. Không dùng tiền tố `NEXT_PUBLIC_` cho key và tuyệt đối không commit `.env.local`.

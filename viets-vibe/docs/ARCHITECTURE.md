@@ -10,6 +10,12 @@ Phản hồi giữ các trường gợi ý cũ và thêm `nhận_xét`, `lý_do`
 
 `lib/backdrops.ts` quản lý ba phông minh họa AI dạng PNG, phong cách 3D cách điệu; dữ liệu ảnh chụp cũ giữ riêng trong `legacyPhotoBackdrops` để ghi nguồn thumbnail cũ. Texture nền cắt khung theo tỉ lệ canvas, không quay cùng camera. Đây là phông 2D để hình dung phối màu, không phải không gian địa danh 3D. Khi thay phông, texture cũ được giải phóng; lỗi tải có thông báo và khóa xuất ảnh tới khi chọn được phông hợp lệ. ID phông được giữ trong URL/lookbook, ảnh chụp canvas đã có nền. PNG ghi rõ phông minh họa AI; thumbnail dẫn tới thông tin hình ảnh tại trang credits.
 
+## Ngôn ngữ
+
+`LanguageProvider` giữ lựa chọn Việt/Anh trong localStorage. Bộ dịch cục bộ `i18n.ts` và `i18n-extra.json` phủ văn bản, nhãn trợ năng và nội dung động; không gọi dịch vụ dịch lúc sử dụng. Observer ghi nhớ cả nguồn và bản đã hiển thị để cập nhật đúng khi React thay nội dung, ngắt quan sát khi dịch để tránh vòng lặp. `TranslationBoundary` và marker trên các component dùng chung trì hoãn dịch cho đến khi React hydrate xong từng vùng, tránh thay chữ trong HTML server trước lúc React tiếp quản. Giá trị option và ID bản phối giữ nguyên, chỉ dịch nhãn. Canvas PNG lấy ngôn ngữ hiện tại khi xuất.
+
+API nhận `language: "vi" | "en"` (mặc định Việt). Gemini trả phần giải thích bằng ngôn ngữ tương ứng, còn schema và enum giữ cố định để áp dụng lên mô hình. Model Google dự phòng chỉ được thử khi model chính bận hoặc timeout.
+
 ## Luồng trải nghiệm
 
 ```mermaid

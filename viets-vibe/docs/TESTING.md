@@ -2,9 +2,11 @@
 
 ## Kết quả kiểm tra gần nhất
 
-Ngày 19/09/2026, trên môi trường macOS và Chrome: production build và **15/15 ca E2E** đều qua. Đã xem ảnh chụp desktop/mobile của thư viện, trang chi tiết và studio 3D; kiểm tra cả mặt trước/mặt sau của sáu phom. Các ca kiểm tra đổi dáng/sắc da/lớp đồ, cảnh báo, xoay, xuất PNG, thumbnail và khôi phục lookbook, URL sai cấu hình và WebGL không khả dụng.
+Ngày 20/09/2026, trên môi trường macOS và Chrome: production build, lint, kiểm tra nội dung và **20/20 ca E2E** đều qua. Đã xem ảnh chụp desktop/mobile của thư viện, trang chi tiết và studio 3D; kiểm tra cả mặt trước/mặt sau của sáu phom. Các ca kiểm tra đổi dáng/sắc da/lớp đồ, cảnh báo, xoay, xuất PNG, thumbnail và khôi phục lookbook, URL sai cấu hình và WebGL không khả dụng.
 
-Hai ca mới kiểm tra ba phông Hà Nội, lưu/khôi phục phông, áp dụng/hoàn tác bản phối AI, lỗi tải phông và phản hồi AI sai schema. Đã gọi API ứng dụng với Google thật bằng `gemini-flash-latest`: HTTP 200, có nhận xét, lý do theo bối cảnh Văn Miếu và cấu hình đầy đủ để áp dụng. Chưa kiểm tra upload ảnh với Google thật, Docker hoặc workflow CI trên GitHub.
+Bộ kiểm thử bao phủ phông Hà Nội, áp dụng/hoàn tác AI, lỗi tải phông/schema, điều hướng về đầu trang, tỉ lệ đầu/chân khi đổi chiều cao, mẫu nam/nữ và chất liệu. Hai ca ngôn ngữ kiểm tra Việt/Anh, trạng thái động, nón lá lưu/khôi phục, giá trị option không bị đổi theo nhãn, request AI đúng ngôn ngữ. Đã rà giao diện tiếng Anh trên 13 route.
+
+Đã gọi Google thật: khi model chính bận, `gemini-flash-lite-latest` trả HTTP 200 qua ứng dụng với áo kem lụa, quần xanh trầm, nón lá và lời giải thích tiếng Anh đúng yêu cầu. Chưa kiểm tra upload ảnh với Google thật, Docker hoặc workflow CI trên GitHub.
 
 ## Tự động
 

@@ -8,8 +8,8 @@ export function sculptHead(skin: T.Material, feminine: boolean) {
   group.position.y = 2.38;
   const hair = new T.MeshPhysicalMaterial({
     color: "#241d1a",
-    roughness: 0.48,
-    sheen: 0.35,
+    roughness: 0.78,
+    sheen: 0.15,
     sheenColor: new T.Color("#665042"),
   });
   const feature = new T.MeshStandardMaterial({
@@ -19,6 +19,14 @@ export function sculptHead(skin: T.Material, feminine: boolean) {
   const strand = new T.MeshStandardMaterial({
     color: "#49382d",
     roughness: 0.7,
+  });
+  const eyeWhite = new T.MeshStandardMaterial({
+    color: "#d1cabe",
+    roughness: 0.78,
+  });
+  const iris = new T.MeshStandardMaterial({
+    color: "#302821",
+    roughness: 0.65,
   });
   function ellipsoid(mat: T.Material, p: number[], s: number[]) {
     const m = new T.Mesh(new T.SphereGeometry(1, 48, 32), mat);
@@ -66,6 +74,8 @@ export function sculptHead(skin: T.Material, feminine: boolean) {
   face.geometry.computeVertexNormals();
   for (const side of [-1, 1]) {
     ellipsoid(skin, [side * 0.146, -0.02, -0.008], [0.022, 0.041, 0.016]);
+    ellipsoid(eyeWhite, [side * 0.055, 0.012, 0.135], [0.022, 0.007, 0.006]);
+    ellipsoid(iris, [side * 0.055, 0.012, 0.141], [0.0045, 0.0055, 0.0018]);
     line(
       [
         [side * 0.029, 0.014, 0.142],
@@ -162,6 +172,7 @@ export function clothMaterial(
   kind: NonNullable<AvatarConfig["fabric"]>,
 ) {
   const data = new Uint8Array(128 * 128 * 4);
+  const pigment = new Uint8Array(128 * 128 * 4);
   for (let y = 0; y < 128; y++)
     for (let x = 0; x < 128; x++) {
       const weave = Math.sin((x * Math.PI) / 2) * Math.cos((y * Math.PI) / 2);
@@ -173,6 +184,11 @@ export function clothMaterial(
       const i = (y * 128 + x) * 4;
       data[i] = data[i + 1] = data[i + 2] = value;
       data[i + 3] = 255;
+      const tone = Math.round(
+        244 + weave * (kind === "linen" ? 10 : 4) + motif * 10,
+      );
+      pigment[i] = pigment[i + 1] = pigment[i + 2] = tone;
+      pigment[i + 3] = 255;
     }
   const texture = new T.DataTexture(data, 128, 128);
   texture.wrapS = texture.wrapT = T.RepeatWrapping;
@@ -181,16 +197,22 @@ export function clothMaterial(
   texture.minFilter = T.LinearMipmapLinearFilter;
   texture.generateMipmaps = true;
   texture.needsUpdate = true;
+  const albedo = texture.clone();
+  albedo.image = { data: pigment, width: 128, height: 128 };
+  albedo.colorSpace = T.SRGBColorSpace;
+  albedo.needsUpdate = true;
   return new T.MeshPhysicalMaterial({
     color,
     side: T.DoubleSide,
-    roughness: kind === "linen" ? 0.9 : kind === "brocade" ? 0.65 : 0.55,
-    sheen: kind === "linen" ? 0.3 : 1,
-    sheenRoughness: kind === "silk" ? 0.65 : 0.8,
-    sheenColor: new T.Color(color).lerp(new T.Color("#fff4df"), 0.32),
+    roughness: kind === "linen" ? 1 : kind === "brocade" ? 0.87 : 0.74,
+    sheen: kind === "linen" ? 0.12 : 0.35,
+    sheenRoughness: 0.95,
+    sheenColor: new T.Color(color),
+    specularIntensity: 0.25,
+    map: albedo,
     bumpMap: texture,
     bumpScale: kind === "linen" ? 0.003 : 0.0015,
-    envMapIntensity: 0.3,
+    envMapIntensity: 0.12,
   });
 }
 

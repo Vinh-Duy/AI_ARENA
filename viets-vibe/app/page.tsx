@@ -11,14 +11,14 @@ import {
   MoveUpRight,
   Sparkles,
 } from "lucide-react";
-import { Header, Footer, Reveal } from "./components/site";
+import { Header, Footer, Reveal, TranslationBoundary } from "./components/site";
 import { garments, regions } from "./lib/heritage";
 import { GarmentCard } from "./components/garment-card";
 import { BrandMark } from "./components/brand-mark";
 export default function Home() {
   const [filter, setFilter] = useState("Tất cả");
   return (
-    <>
+    <TranslationBoundary>
       <Header />
       <main>
         <section className="hero section-wrap" id="top">
@@ -264,6 +264,6 @@ export default function Home() {
         </section>
       </main>
       <Footer />
-    </>
+    </TranslationBoundary>
   );
 }

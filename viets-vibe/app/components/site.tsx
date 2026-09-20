@@ -4,6 +4,8 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
+  useSyncExternalStore,
   type ReactNode,
   type MouseEvent,
 } from "react";
@@ -11,84 +13,147 @@ import Link from "next/link";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { BrandMark } from "./brand-mark";
 import { motion, MotionConfig } from "framer-motion";
-import {
-  translateText,
-  type Language,
-} from "../lib/i18n";
+import { translateText, type Language } from "../lib/i18n";
 
 const LanguageContext = createContext<{
   language: Language;
   toggleLanguage: () => void;
 }>({ language: "vi", toggleLanguage: () => undefined });
 
-const textSources = new WeakMap<Text, string>();
-const attributeSources = new WeakMap<HTMLElement, Map<string, string>>();
+const textSources = new WeakMap<Text, { source: string; rendered: string }>();
+const attributeSources = new WeakMap<
+  HTMLElement,
+  Map<string, { source: string; rendered: string }>
+>();
 
 function translatePage(language: Language) {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
   let node = walker.nextNode();
   while (node) {
-    if (node.parentElement && !["SCRIPT", "STYLE"].includes(node.parentElement.tagName)) {
+    if (
+      node.parentElement &&
+      !node.parentElement.closest(
+        "script,style,textarea,[data-no-translate],[data-translation-pending]",
+      )
+    ) {
       nodes.push(node as Text);
     }
     node = walker.nextNode();
   }
   nodes.forEach((textNode) => {
-    const value = textSources.get(textNode) || textNode.nodeValue || "";
-    textSources.set(textNode, value);
+    const current = textNode.nodeValue || "";
+    const previous = textSources.get(textNode);
+    const value =
+      previous && previous.rendered === current ? previous.source : current;
     const trimmed = value.trim();
     if (!trimmed) return;
     const translated = translateText(trimmed, language);
     const nextValue = value.replace(trimmed, translated);
+    textSources.set(textNode, { source: value, rendered: nextValue });
     if (nextValue !== textNode.nodeValue) {
       textNode.nodeValue = nextValue;
     }
   });
   document.querySelectorAll<HTMLElement>("body *").forEach((element) => {
     if (["SCRIPT", "STYLE"].includes(element.tagName)) return;
-    const sources = attributeSources.get(element) || new Map<string, string>();
+    if (element.closest("[data-no-translate],[data-translation-pending]"))
+      return;
+    const sources =
+      attributeSources.get(element) ||
+      new Map<string, { source: string; rendered: string }>();
     ["aria-label", "placeholder", "title", "alt"].forEach((attribute) => {
       const current = element.getAttribute(attribute);
       if (current === null) return;
-      const source = sources.get(attribute) || current;
-      sources.set(attribute, source);
+      const previous = sources.get(attribute);
+      const source =
+        previous && previous.rendered === current ? previous.source : current;
       const translated = translateText(source, language);
+      sources.set(attribute, { source, rendered: translated });
       if (translated !== current) element.setAttribute(attribute, translated);
     });
     attributeSources.set(element, sources);
   });
 }
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>(() =>
-    typeof window !== "undefined" &&
-    window.localStorage.getItem("viets-vibe-language") === "en"
+let volatileLanguage: Language = "vi";
+function readLanguage(): Language {
+  try {
+    return window.localStorage.getItem("viets-vibe-language") === "en"
       ? "en"
-      : "vi",
+      : "vi";
+  } catch {
+    return volatileLanguage;
+  }
+}
+function subscribeLanguage(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener("viets-language", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("viets-language", callback);
+  };
+}
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const language = useSyncExternalStore(
+    subscribeLanguage,
+    readLanguage,
+    () => "vi" as Language,
   );
   function toggleLanguage() {
     const nextLanguage: Language = language === "vi" ? "en" : "vi";
-    setLanguage(nextLanguage);
-    window.localStorage.setItem("viets-vibe-language", nextLanguage);
+    volatileLanguage = nextLanguage;
+    try {
+      window.localStorage.setItem("viets-vibe-language", nextLanguage);
+    } catch {}
+    window.dispatchEvent(new Event("viets-language"));
   }
   useEffect(() => {
     document.documentElement.lang = language;
     translatePage(language);
-    const observer = new MutationObserver(() => translatePage(language));
-    observer.observe(document.body, {
+    const options = {
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["aria-label", "placeholder", "title", "alt"],
+      attributeFilter: [
+        "aria-label",
+        "placeholder",
+        "title",
+        "alt",
+        "data-translation-pending",
+      ],
       subtree: true,
+    };
+    const observer = new MutationObserver(() => {
+      observer.disconnect();
+      translatePage(language);
+      observer.observe(document.body, options);
     });
+    observer.observe(document.body, options);
     return () => observer.disconnect();
   }, [language]);
   return (
     <LanguageContext.Provider value={{ language, toggleLanguage }}>
       {children}
     </LanguageContext.Provider>
+  );
+}
+
+// Streaming/Suspense may hydrate each island after the provider effect runs.
+// Keep its server text untouched until that island has committed.
+export function useTranslationReady<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    ref.current?.removeAttribute("data-translation-pending");
+  }, []);
+  return ref;
+}
+export function TranslationBoundary({ children }: { children: ReactNode }) {
+  const ref = useTranslationReady<HTMLDivElement>();
+  return (
+    <div ref={ref} data-translation-pending="" style={{ display: "contents" }}>
+      {children}
+    </div>
   );
 }
 
@@ -104,9 +169,12 @@ export function Reveal({
   className?: string;
   delay?: number;
 }) {
+  const ref = useTranslationReady<HTMLDivElement>();
   return (
     <MotionConfig reducedMotion="user">
       <motion.div
+        ref={ref}
+        data-translation-pending=""
         className={`reveal ${className}`}
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -123,6 +191,7 @@ export function Header({
 }: {
   active?: "home" | "studio" | "lookbook";
 }) {
+  const ref = useTranslationReady<HTMLElement>();
   const [open, setOpen] = useState(false);
   const { language, toggleLanguage } = useLanguage();
   function navigate(event: MouseEvent<HTMLAnchorElement>) {
@@ -156,7 +225,7 @@ export function Header({
     },
   ];
   return (
-    <header className="site-header">
+    <header ref={ref} data-translation-pending="" className="site-header">
       <div className="nav-wrap">
         <Link
           href="/"
@@ -238,8 +307,9 @@ export function Header({
   );
 }
 export function Footer() {
+  const ref = useTranslationReady<HTMLElement>();
   return (
-    <footer className="site-footer">
+    <footer ref={ref} data-translation-pending="" className="site-footer">
       <Link className="brand" href="/">
         <BrandMark className="brand-mark" size={28} />
         <span>Viets Vibe.</span>

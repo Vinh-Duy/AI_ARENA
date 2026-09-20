@@ -267,7 +267,13 @@ export const occasions = [
   "Dự lễ trang trọng",
 ];
 export const vibes = ["Thanh lịch", "Tối giản", "Nàng thơ", "Cá tính"];
-export const accessories = ["Quạt giấy", "Túi cói", "Ngọc trai", "Khăn vấn"];
+export const accessories = [
+  "Quạt giấy",
+  "Túi cói",
+  "Ngọc trai",
+  "Khăn vấn",
+  "Nón lá",
+];
 export type StyleSuggestion = {
   tên_trang_phục: string;
   nguồn_gốc: string;

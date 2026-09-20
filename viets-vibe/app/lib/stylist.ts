@@ -45,7 +45,7 @@ export function validRecommendation(
     garments.some((g) => g.id === r.garment) &&
     colors.some((c) => c.name === r.color) &&
     Array.isArray(r.accessories) &&
-    r.accessories.length <= 4 &&
+    r.accessories.length <= accessories.length &&
     r.accessories.every((a) => accessories.includes(a)) &&
     validLayers(r.layers)
   );
@@ -76,7 +76,7 @@ export const recommendationSchema = {
     accessories: {
       type: "array",
       items: { type: "string", enum: accessories },
-      maxItems: 4,
+      maxItems: accessories.length,
     },
     layers: {
       type: "object",

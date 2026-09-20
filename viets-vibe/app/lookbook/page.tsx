@@ -3,7 +3,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Bookmark, Plus, Trash2 } from "lucide-react";
-import { Footer, Header, Reveal } from "../components/site";
+import { Footer, Header, Reveal, TranslationBoundary } from "../components/site";
 import { LookbookTools } from "../components/lookbook-tools";
 import { colors, garments, type SavedLook } from "../lib/heritage";
 import { findBackdrop } from "../lib/backdrops";
@@ -45,7 +45,7 @@ export default function Lookbook() {
     }
   }
   return (
-    <>
+    <TranslationBoundary>
       <Header active="lookbook" />
       <main className="lookbook-page section-wrap">
         <Reveal>
@@ -193,6 +193,6 @@ export default function Lookbook() {
         )}
       </main>
       <Footer />
-    </>
+    </TranslationBoundary>
   );
 }

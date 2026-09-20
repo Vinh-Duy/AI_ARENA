@@ -13,6 +13,7 @@ import { Download, RotateCcw, Rotate3D, ZoomIn, ZoomOut } from "lucide-react";
 import { buildMannequin, disposeModel } from "../lib/mannequin";
 import type { AvatarConfig } from "../lib/avatar";
 import { findBackdrop } from "../lib/backdrops";
+import { translateText } from "../lib/i18n";
 
 function fitBackground(texture: T.Texture, aspect: number) {
   const image = texture.image as HTMLImageElement;
@@ -342,17 +343,28 @@ export default function AvatarCanvas({
       ctx.drawImage(source, 0, 0);
       ctx.fillStyle = "#34392f";
       ctx.font = "20px sans-serif";
-      ctx.fillText("VIỆT’S VIBE · STUDIO 3D", 24, source.height + 36);
+      const language = document.documentElement.lang === "en" ? "en" : "vi";
+      ctx.fillText(
+        translateText("VIỆT’S VIBE · STUDIO 3D", language),
+        24,
+        source.height + 36,
+      );
       ctx.font = "14px sans-serif";
       ctx.fillText(
-        "Phác thảo phom & màu · không phải phục dựng hay đo độ vừa vặn",
+        translateText(
+          "Phác thảo phom & màu · không phải phục dựng hay đo độ vừa vặn",
+          language,
+        ),
         24,
         source.height + 66,
         image.width - 48,
       );
       if (location.image) {
         ctx.font = "12px sans-serif";
-        const credit = `${location.name} · Phông minh họa tạo bằng AI, mang phong cách 3D. Kiến trúc cách điệu, không phải ảnh thực địa hay phục dựng lịch sử.`;
+        const credit =
+          language === "en"
+            ? `${translateText(location.name, "en")} · AI-illustrated backdrop with a 3D look. Stylized architecture, not a site photograph or historical reconstruction.`
+            : `${location.name} · Phông minh họa tạo bằng AI, mang phong cách 3D. Kiến trúc cách điệu, không phải ảnh thực địa hay phục dựng lịch sử.`;
         let line = "",
           y = source.height + 92;
         for (const char of credit) {

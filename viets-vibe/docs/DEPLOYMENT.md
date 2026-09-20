@@ -13,6 +13,8 @@ npm run start
 
 Build cần mạng tải Google Fonts. Runtime cần HTTPS ra Google để gọi Gemini. Cấu hình `GEMINI_API_KEY` bằng biến môi trường bí mật; `GEMINI_MODEL` tùy chọn. Khởi động lại server khi thay env.
 
+`GEMINI_FALLBACK_MODEL` mặc định `gemini-flash-lite-latest`: thử một lần khi model chính trả 503/504 hoặc timeout. Không thử lại lỗi key, quyền, model không tồn tại hoặc quota. Model chính có 22 giây, dự phòng 25 giây; client chờ tối đa 60 giây. Response thành công có trường `model` để xác định model đã trả lời.
+
 Model mặc định hiện là `gemini-flash-latest`. Trong lần kiểm tra local, `gemini-2.5-flash` trả 404 khi generateContent, trong khi alias Flash trả lời được. Nếu deployment đã đặt model cũ, sửa biến `GEMINI_MODEL` ở Vercel/Render và redeploy; thay `.env.local` không tự cập nhật biến trên hosting. Alias có thể đổi model theo thời gian, nên kiểm tra lại quota và model trước buổi demo. API báo riêng lỗi quyền truy cập, model không khả dụng, quota và timeout; không log key hoặc nội dung ảnh.
 
 Với nền tảng hỗ trợ Next.js: đặt **Root Directory = viets-vibe**, install `npm ci`, build `npm run build`. Không dùng static export vì `/api/style` cần server. Đặt timeout nền tảng đủ cho request Gemini (ứng dụng đặt timeout khoảng 55–60 giây).

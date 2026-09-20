@@ -30,7 +30,13 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { Header, Footer, Reveal } from "../components/site";
+import {
+  Header,
+  Footer,
+  Reveal,
+  useLanguage,
+  TranslationBoundary,
+} from "../components/site";
 import {
   accessories,
   colors,
@@ -46,6 +52,7 @@ import { validSuggestion, type OutfitRecommendation } from "../lib/stylist";
 import { BrandMark } from "../components/brand-mark";
 
 function Studio() {
+  const { language } = useLanguage();
   const params = useSearchParams();
   const [backdropId, setBackdropId] = useState(
     () => findBackdrop(params.get("backdrop")).id,
@@ -184,6 +191,7 @@ function Studio() {
         signal: AbortSignal.timeout(60000),
         body: JSON.stringify({
           occasion,
+          language,
           garment: garment.name,
           color: colorName,
           vibe,
@@ -302,7 +310,7 @@ function Studio() {
     }
   }
   return (
-    <>
+    <TranslationBoundary>
       <Header active="studio" />
       <main className="studio-page section-wrap">
         <Reveal>
@@ -406,7 +414,9 @@ function Studio() {
                       }}
                     >
                       {occasions.map((o) => (
-                        <option key={o}>{o}</option>
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
                       ))}
                     </select>
                     <ChevronDown size={16} />
@@ -930,7 +940,7 @@ function Studio() {
         </div>
       </main>
       <Footer />
-    </>
+    </TranslationBoundary>
   );
 }
 export default function MixMatchPage() {

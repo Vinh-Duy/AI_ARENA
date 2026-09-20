@@ -1,6 +1,34 @@
+import extra from "./i18n-extra.json";
 export type Language = "vi" | "en";
 
 const translations: Record<string, string> = {
+  ...extra,
+  "theo cách của bạn.": "your way.",
+  "Việt phục": "Vietnamese traditional dress",
+  "Gemini đang bận. Bạn có thể thử lại sau hoặc dùng gợi ý cơ bản.":
+    "Gemini is busy. Please try again later or use the basic suggestions.",
+  "Gemini đã chạm giới hạn lượt gọi hoặc quota. Đợi một chút rồi thử lại; nếu còn lỗi, kiểm tra quota của Google project.":
+    "Gemini's request limit or quota has been reached. Wait and try again; if it continues, check the Google project's quota.",
+  "Chưa nhận được bản phối hợp lệ từ Gemini. Vui lòng thử lại sau.":
+    "Gemini did not return a valid outfit. Please try again later.",
+  "Gemini phản hồi quá lâu. Thử lại với yêu cầu ngắn hơn hoặc không kèm ảnh.":
+    "Gemini took too long. Try a shorter request or omit the image.",
+  "Google không chấp nhận API key. Hãy tạo key Gemini mới trong Google AI Studio, cập nhật phía server rồi khởi động lại hoặc redeploy.":
+    "Google rejected the API key. Create a new Gemini key in Google AI Studio, update it on the server, then restart or redeploy.",
+  "Google từ chối quyền truy cập. Kiểm tra quyền Gemini API và cấu hình Google project của key.":
+    "Google denied access. Check the key's Gemini API permissions and Google project settings.",
+  "Model Gemini đang cấu hình không khả dụng. Người triển khai cần đổi GEMINI_MODEL sang model hỗ trợ generateContent rồi khởi động lại hoặc redeploy.":
+    "The configured Gemini model is unavailable. Set GEMINI_MODEL to an available generateContent model, then restart or redeploy.",
+  Phông: "Backdrop",
+  Sau: "Back",
+  "Nón lá": "Conical hat",
+  "Bối cảnh minh họa 3D cách điệu.": "A stylized 3D illustration.",
+  "Phông minh họa AI dạng 2D, phong cách 3D; ma-nơ-canh xoay độc lập.":
+    "An AI-illustrated 2D backdrop with a 3D look; the mannequin rotates independently.",
+  "Giản dị như một buổi chiều miền Tây.":
+    "As relaxed as an afternoon in the Mekong Delta.",
+  "Khuê Văn Các với gạch đỏ và cây xanh. Gợi ý biên tập: màu kem, xanh trầm; chú ý bối cảnh di tích.":
+    "Khue Van Cac with red brick and green trees. Editorial suggestion: cream or deep green; respect the heritage setting.",
   "Trang chủ": "Home",
   "Điều hướng chính": "Main navigation",
   "Điều hướng di động": "Mobile navigation",
@@ -20,10 +48,12 @@ const translations: Record<string, string> = {
   "Nếp xưa.": "Old roots.",
   "Chất mới.": "New spirit.",
   "Không chỉ mặc một bộ đồ.": "It is more than an outfit.",
-  "Mặc một câu chuyện, kể theo cách của bạn.": "Wear a story. Tell it your way.",
+  "Mặc một câu chuyện, kể theo cách của bạn.":
+    "Wear a story. Tell it your way.",
   "Khám phá Việt phục, remix cùng AI và tìm thấy":
     "Explore Vietnamese dress, remix it with AI and find",
-  "phiên bản rất riêng của chính mình.": "a version that feels unmistakably yours.",
+  "phiên bản rất riêng của chính mình.":
+    "a version that feels unmistakably yours.",
   "Bắt đầu phối đồ": "Start styling",
   "Khám phá di sản": "Explore heritage",
   "Sáng tạo cùng": "Create with",
@@ -56,10 +86,8 @@ const translations: Record<string, string> = {
     "A familiar garment, your favorite color, an unexpected accessory.",
   "Để Gemini gợi mở những bản phối mang dấu ấn riêng.":
     "Let Gemini open up looks that feel like you.",
-  "Chọn trang phục, màu sắc & phong cách":
-    "Choose a garment, color and style",
-  "Nhận gợi ý phối cùng lưu ý văn hóa":
-    "Get styling ideas with cultural notes",
+  "Chọn trang phục, màu sắc & phong cách": "Choose a garment, color and style",
+  "Nhận gợi ý phối cùng lưu ý văn hóa": "Get styling ideas with cultural notes",
   "Lưu lại thành lookbook của riêng bạn": "Save it to your own lookbook",
   "Vào phòng phối đồ": "Enter the mix studio",
   "Không cần tài khoản. Cứ thỏa sức sáng tạo.":
@@ -75,8 +103,7 @@ const translations: Record<string, string> = {
   "TRUYỀN THỐNG LÀ ĐIỂM BẮT ĐẦU.": "TRADITION IS THE STARTING POINT.",
   "Phần tiếp theo,": "The next chapter",
   "là bạn.": "is you.",
-  "Thử một bản phối. Kể một câu chuyện mới.":
-    "Try a look. Tell a new story.",
+  "Thử một bản phối. Kể một câu chuyện mới.": "Try a look. Tell a new story.",
   "Đi qua những miền.": "Across regions.",
   "Gặp lại nếp xưa.": "Meet old lines again.",
   "Một thư viện nhỏ để hiểu chiếc áo bạn chọn.":
@@ -94,7 +121,7 @@ const translations: Record<string, string> = {
     "Regions shape the story, not where you can wear it.",
   "Chưa tìm thấy nếp áo này.": "This garment is not in the archive.",
   "Thử tìm “ngũ thân”, “bà ba” hoặc chọn một vùng khác.":
-    'Try “ngu than”, “ba ba” or choose another region.',
+    "Try “ngu than”, “ba ba” or choose another region.",
   "Xem toàn bộ thư viện": "View the full library",
   "Hiểu trước khi biến tấu.": "Understand before you remix.",
   "Đọc cách chọn tư liệu": "Read how sources are selected",
@@ -133,9 +160,9 @@ const translations: Record<string, string> = {
   "Dịp mặc": "Occasion",
   "Phụ kiện": "Accessories",
   "Bối cảnh": "Backdrop",
-  "Áo": "Garment",
+  Áo: "Garment",
   "Quần / váy": "Bottom",
-  "Giày": "Shoes",
+  Giày: "Shoes",
   "Về Viets Vibe": "About Viets Vibe",
   "Sáng tạo thoải mái.": "Create freely.",
   "Hiểu dữ liệu đi đâu.": "Know where your data goes.",
@@ -233,7 +260,7 @@ const translations: Record<string, string> = {
     "The path may have changed. Other stories are still waiting for you.",
   "Đang mở một miền cảm hứng…": "Opening a world of inspiration…",
   "THE REMIX STUDIO / 3D": "THE REMIX STUDIO / 3D",
-  "Hôm nay, bạn": "Today, you",
+  "Hôm nay, bạn": "Today,",
   "mặc gì?": "what will you wear?",
   "Chọn dáng người. Khoác nếp áo. Xoay để thấy chất riêng.":
     "Choose a silhouette. Layer a story. Turn it to find your style.",
@@ -285,7 +312,7 @@ const translations: Record<string, string> = {
   "Dạo phố": "City stroll",
   "Chụp kỷ yếu": "Yearbook shoot",
   "Lễ hội": "Festival",
-  "Tết": "Tet",
+  Tết: "Tet",
   "Dự lễ trang trọng": "Formal ceremony",
   "Thanh lịch": "Elegant",
   "Tối giản": "Minimal",
@@ -302,10 +329,12 @@ const translations: Record<string, string> = {
   "Màu áo": "Garment color",
   "Chất liệu": "Fabric",
   "Đã áp dụng bản phối AI lên ma-nơ-canh.": "AI look applied to the mannequin.",
-  "Đã trở lại bản phối trước khi áp dụng AI.": "Returned to the look from before AI was applied.",
+  "Đã trở lại bản phối trước khi áp dụng AI.":
+    "Returned to the look from before AI was applied.",
   "Nền trung tính · một màu làm điểm nhấn": "Neutral base · one accent color",
   "Các sắc gần nhau · tổng thể nhẹ nhàng": "Close hues · a gentle overall look",
-  "Tương phản rõ · chọn một màu chủ đạo": "Clear contrast · choose one main color",
+  "Tương phản rõ · chọn một màu chủ đạo":
+    "Clear contrast · choose one main color",
   "Nhiều nhóm sắc · thử tiết chế phụ kiện": "Many hues · try fewer accessories",
   "Gợi ý theo khoảng cách sắc màu, không phải điểm đánh giá thẩm mỹ.":
     "A suggestion based on color distance, not an aesthetic score.",
@@ -330,11 +359,13 @@ const translations: Record<string, string> = {
   "Gợi ý AI có thể chưa chính xác; đối chiếu nguồn tư liệu khi dùng trong bối cảnh nghi lễ.":
     "AI suggestions may be imperfect; compare with sources when using them in ceremonial contexts.",
   "Mở lookbook của bạn": "Open your lookbook",
-  "MANG BỘ SƯU TẬP SANG MỘT THIẾT BỊ KHÁC.": "BRING YOUR COLLECTION TO ANOTHER DEVICE.",
+  "MANG BỘ SƯU TẬP SANG MỘT THIẾT BỊ KHÁC.":
+    "BRING YOUR COLLECTION TO ANOTHER DEVICE.",
   "Đã tạo bản sao lookbook. File không chứa ảnh cá nhân.":
     "Lookbook backup created. The file does not contain personal images.",
   "Chọn file JSON nhỏ hơn 10 MB.": "Choose a JSON file smaller than 10 MB.",
-  "Đây chưa phải bản sao lookbook hợp lệ.": "This is not a valid lookbook backup.",
+  "Đây chưa phải bản sao lookbook hợp lệ.":
+    "This is not a valid lookbook backup.",
   "File có bản phối không hợp lệ hoặc không có dữ liệu.":
     "The file contains invalid looks or no data.",
   "Lookbook tối đa 30 bản. Hãy xóa bớt một số bản phối trước khi nhập.":
@@ -347,7 +378,8 @@ const translations: Record<string, string> = {
   "Đang đọc dữ liệu đã lưu.": "Reading saved data.",
   "Chưa thể đọc dữ liệu đã lưu. Hãy kiểm tra quyền lưu trữ của trình duyệt; dữ liệu hiện tại chưa bị thay đổi.":
     "Could not read saved data. Check browser storage permissions; current data was not changed.",
-  "Chưa thể cập nhật lookbook. Bạn thử lại nhé.": "Could not update the lookbook. Please try again.",
+  "Chưa thể cập nhật lookbook. Bạn thử lại nhé.":
+    "Could not update the lookbook. Please try again.",
   "Chưa thể khôi phục bản phối.": "Could not restore the look.",
   "Xóa bản phối": "Delete look",
   "Thử phối": "Try this look",
@@ -365,21 +397,70 @@ const translations: Record<string, string> = {
     "Ao ba ba paired with a checked scarf and conical hat in a cultural activity.",
 };
 
+const normalize = (value: string) => value.replace(/\s+/g, " ").trim();
+const normalized = new Map(
+  Object.entries(translations).map(([vi, en]) => [normalize(vi), en]),
+);
 const englishToVietnamese = new Map(
-  Object.entries(translations).map(([vietnamese, english]) => [english, vietnamese]),
+  Object.entries(translations).map(([vi, en]) => [normalize(en), vi]),
+);
+const phraseMap = new Map(
+  [...normalized].map(([vi, en]) => [vi.toLocaleLowerCase("vi"), en]),
+);
+const escaped = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const phrases = new RegExp(
+  [...normalized.keys()]
+    .filter((s) => /[à-ỹĐđ]/u.test(s))
+    .sort((a, b) => b.length - a.length)
+    .map(escaped)
+    .join("|"),
+  "giu",
 );
 
-export function translateText(value: string, language: Language) {
-  const direct = language === "en" ? translations[value] : englishToVietnamese.get(value);
+export function translateText(value: string, language: Language): string {
+  const clean = normalize(value);
+  const direct =
+    language === "en" ? normalized.get(clean) : englishToVietnamese.get(clean);
   if (direct) return direct;
   if (language === "en") {
-    return value
-      .replace(/^(\d+) trang phục( cho “.*”)?$/, (_, count, query = "") => `${count} garments${query ? ` for “${query.slice(3, -1)}”` : ""}`)
+    return clean
+      .replace(
+        /^Lấy (.+) làm màu chủ đạo; dùng bảng màu từng lớp bạn đã chọn để cân bằng tổng thể\.$/,
+        (_, color) =>
+          `Use ${translateText(color, "en")} as the main color, and balance the outfit with your layer palette.`,
+      )
+      .replace(
+        /Bản hiện tại dùng (.+?) và (.+?)\./g,
+        (_, bottom, shoes) =>
+          `This look uses ${translateText(bottom, "en")} and ${translateText(shoes, "en")}.`,
+      )
+      .replace(
+        /^Điểm xuyết (.+); chọn một món làm điểm nhấn để tổng thể không quá nhiều chi tiết\.$/,
+        (_, items) =>
+          `Accessorize with ${translateText(items, "en")}; choose one focal piece to keep the outfit uncluttered.`,
+      )
+      .replace(
+        /^(\d+) trang phục( cho “.*”)?$/,
+        (_, count, query = "") =>
+          `${count} garments${query ? ` for “${query.slice(3, -1)}”` : ""}`,
+      )
       .replace(/^Sắc da (\d+)$/, "Skin tone $1")
-      .replace(/^Màu (.+)$/, (_, label) => `Color ${translations[label] || label}`)
+      .replace(
+        /^Màu (.+)$/,
+        (_, label) => `Color ${translations[label] || label}`,
+      )
       .replace(/^Xóa bản phối (.+)$/, "Delete look $1")
       .replace(/^Phối (.+) theo chất riêng$/, "Style $1 your way")
-      .replace(/^Đọc câu chuyện (.+)$/, "Read the story of $1");
+      .replace(/^Đọc câu chuyện (.+)$/, "Read the story of $1")
+      .replace(/^HÀ NỘI \/ (.+)$/, "HANOI / $1")
+      .replace(
+        /^Đã nhập (\d+) bản phối mới; bỏ qua bản đã có\.$/,
+        "Imported $1 new looks; skipped duplicates.",
+      )
+      .replace(
+        phrases,
+        (match) => phraseMap.get(match.toLocaleLowerCase("vi")) || match,
+      );
   }
   return value;
 }

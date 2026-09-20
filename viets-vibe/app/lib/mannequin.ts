@@ -14,8 +14,9 @@ export function buildMannequin(
     new T.MeshStandardMaterial({ color: c, roughness, side: T.DoubleSide });
   const skin = new T.MeshPhysicalMaterial({
       color: a.skin,
-      roughness: 0.57,
-      clearcoat: 0.08,
+      roughness: 0.82,
+      specularIntensity: 0.3,
+      clearcoat: 0,
       clearcoatRoughness: 0.7,
     }),
     cloth = clothMaterial(color, a.fabric || "silk"),
@@ -216,6 +217,35 @@ export function buildMannequin(
     [1.98, shoulder - 0.035, 0.14],
     [2.06, 0.107, 0.108],
   ];
+  const stitching = material(
+    new T.Color(color).multiplyScalar(0.72).getStyle(),
+    1,
+  );
+  function seam(points: number[][], radius = 0.0025) {
+    return mesh(
+      new T.TubeGeometry(
+        new T.CatmullRomCurve3(
+          points.map((p) => new T.Vector3(...(p as [number, number, number]))),
+        ),
+        40,
+        radius,
+        5,
+        false,
+      ),
+      stitching,
+    );
+  }
+  for (const side of [-1, 1]) {
+    seam(
+      [
+        [side * 0.106, 2.046, 0.09],
+        [side * (shoulder - 0.075), 1.958, 0.134],
+        [side * (shoulder + 0.013), 1.81, 0.153],
+        [side * (shoulder + 0.005), 1.72, 0.139],
+      ],
+      0.002,
+    );
+  }
   if (open) fabric(cloth, topRings, Math.PI * 0.64, Math.PI * 1.72);
   else fabric(cloth, topRings);
   if (!short) {
@@ -274,7 +304,11 @@ export function buildMannequin(
         sleevePositions.getX(i),
       );
       const fold =
-        1 + Math.sin(angle * 8 + t * 2) * 0.045 * Math.sin(Math.PI * t);
+        1 +
+        Math.sin(angle * 8 + t * 2) * 0.045 * Math.sin(Math.PI * t) +
+        Math.sin(t * 35 + angle * 0.7) *
+          0.035 *
+          Math.exp(-Math.pow((t - 0.57) / 0.22, 2));
       sleevePositions.setXYZ(
         i,
         sleevePositions.getX(i) * fold,
@@ -284,6 +318,20 @@ export function buildMannequin(
     }
     sleeve.geometry.computeVertexNormals();
     oldGeometry.dispose();
+    // A narrow fabric cuff follows the sleeve axis instead of a floating trim ring.
+    const cuff = mesh(
+      new T.CylinderGeometry(
+        wide ? 0.225 : 0.071,
+        wide ? 0.222 : 0.073,
+        0.026,
+        48,
+        1,
+        true,
+      ),
+      cloth,
+      ...(end as [number, number, number]),
+    );
+    cuff.quaternion.copy(sleeve.quaternion);
     if (id === "nhat-binh")
       for (let i = 0; i < 3; i++) {
         bar(
@@ -350,6 +398,38 @@ export function buildMannequin(
       0,
     );
     hat.rotation.x = Math.PI / 2;
+  }
+  if (extras.includes("Nón lá")) {
+    const straw = clothMaterial("#d4bd83", "linen");
+    const ribs = material("#987443", 0.94);
+    const hat = mesh(
+      new T.ConeGeometry(0.365, 0.235, 96, 12, true),
+      straw,
+      0,
+      2.57,
+      0,
+    );
+    hat.name = "non-la";
+    // Open underside, fine concentric bamboo rings and a fabric chin strap.
+    for (let i = 1; i <= 9; i++) {
+      const radius = (0.365 * i) / 9;
+      const ring = mesh(
+        new T.TorusGeometry(radius, 0.0018, 5, 96),
+        ribs,
+        0,
+        2.6875 - (0.235 * i) / 9,
+        0,
+      );
+      ring.rotation.x = Math.PI / 2;
+    }
+    for (const side of [-1, 1]) {
+      const curve = new T.CatmullRomCurve3([
+        new T.Vector3(side * 0.22, 2.45, 0),
+        new T.Vector3(side * 0.13, 2.23, 0.075),
+        new T.Vector3(0, 2.19, 0.08),
+      ]);
+      mesh(new T.TubeGeometry(curve, 24, 0.006, 6, false), lining);
+    }
   }
   if (extras.includes("Ngọc trai")) {
     for (let i = 0; i < 24; i++) {

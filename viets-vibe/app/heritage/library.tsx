@@ -1,16 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Search, X } from "lucide-react";
-import { Reveal } from "../components/site";
+import { Reveal, TranslationBoundary } from "../components/site";
 import { GarmentCard } from "../components/garment-card";
 import { garments, regions, findGarments } from "../lib/heritage";
+const subscribeHydration = () => () => {};
 export function Library() {
+  // Do not accept typing into the server-rendered field before React can retain it.
+  const interactive = useSyncExternalStore(
+    subscribeHydration,
+    () => true,
+    () => false,
+  );
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState("Tất cả");
   const results = findGarments(query, region);
   return (
-    <>
+    <TranslationBoundary>
       <Reveal>
         <div className="library-intro">
           <div>
@@ -44,6 +51,7 @@ export function Library() {
           <Search size={18} />
           <input
             type="search"
+            disabled={!interactive}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Tìm tên áo, vùng miền…"
@@ -112,6 +120,6 @@ export function Library() {
           Đọc cách chọn tư liệu <ArrowUpRight size={16} />
         </Link>
       </aside>
-    </>
+    </TranslationBoundary>
   );
 }
