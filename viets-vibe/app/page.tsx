@@ -71,7 +71,10 @@ export default function Home() {
               <br className="desktop-break" /> phiên bản rất riêng của chính
               mình.
             </p>
-            <div className="hero-actions" style={{ flexWrap: "wrap", gap: "12px" }}>
+            <div
+              className="hero-actions"
+              style={{ flexWrap: "wrap", gap: "12px" }}
+            >
               <Link href="/mix-match" className="button button-primary">
                 Bắt đầu phối đồ <ArrowUpRight size={19} />
               </Link>
@@ -186,15 +189,26 @@ export default function Home() {
               <div>
                 <span
                   className="eyebrow"
-                  style={{ color: "#e09f3e", marginBottom: "6px", display: "inline-flex" }}
+                  style={{
+                    color: "#e09f3e",
+                    marginBottom: "6px",
+                    display: "inline-flex",
+                  }}
                 >
                   <span className="live-dot" /> TRẢI NGHIỆM TƯƠNG TÁC MỚI
                 </span>
-                <h3 style={{ margin: "4px 0", fontSize: "1.25rem", fontWeight: 600 }}>
+                <h3
+                  style={{
+                    margin: "4px 0",
+                    fontSize: "1.25rem",
+                    fontWeight: 600,
+                  }}
+                >
                   Hành lang 3D Việt Phục &amp; Không gian Soi Chi Tiết 360°
                 </h3>
                 <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.85 }}>
-                  Bước vào hiên gỗ cổ truyền, ngắm tận mắt từng nếp Áo Giao Lĩnh, Tứ Thân, Ngũ Thân, Áo Dài và Nhật Bình.
+                  Bước vào hiên gỗ cổ truyền, ngắm tận mắt từng nếp Áo Giao
+                  Lĩnh, Tứ Thân, Ngũ Thân, Áo Dài và Nhật Bình.
                 </p>
               </div>
               <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -208,7 +222,9 @@ export default function Home() {
                     cursor: "pointer",
                   }}
                 >
-                  {showInline3D ? "Đóng khung 3D thu nhỏ" : "Xem thử 3D tại đây"}
+                  {showInline3D
+                    ? "Đóng khung 3D thu nhỏ"
+                    : "Xem thử 3D tại đây"}
                 </button>
                 <Link href="/viet-phuc" className="button button-primary">
                   Vào Không gian 3D Toàn màn hình <ArrowUpRight size={17} />
@@ -267,7 +283,13 @@ export default function Home() {
 
           <div
             className="collection-bottom"
-            style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", justifyContent: "space-between" }}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "12px",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
             <p>Mỗi vùng một sắc áo. Mỗi người một cách kể.</p>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>

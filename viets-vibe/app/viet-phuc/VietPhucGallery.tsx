@@ -3,7 +3,13 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { Canvas, useFrame, useThree, ThreeEvent } from "@react-three/fiber";
-import { useGLTF, CameraControls, Environment, ContactShadows, Html } from "@react-three/drei";
+import {
+  useGLTF,
+  CameraControls,
+  Environment,
+  ContactShadows,
+  Html,
+} from "@react-three/drei";
 import * as THREE from "three";
 import manifestData from "./gallery_manifest.json";
 
@@ -60,7 +66,7 @@ function SceneContent({
   const isPortrait = size.width < size.height;
   const activeGarment = useMemo(
     () => manifest.garments.find((g) => g.id === activeId) || null,
-    [activeId]
+    [activeId],
   );
 
   const inStudio = isStudio360 && activeGarment !== null;
@@ -112,7 +118,7 @@ function SceneContent({
         tx,
         ty,
         tz,
-        true
+        true,
       );
       targetYawRef.current = 0;
     }
@@ -126,9 +132,16 @@ function SceneContent({
 
       const baseRot = initialRotations.current[g.meshName] ?? 0;
       const desiredRot =
-        g.id === activeId && !isStudio360 ? baseRot + targetYawRef.current : baseRot;
+        g.id === activeId && !isStudio360
+          ? baseRot + targetYawRef.current
+          : baseRot;
 
-      obj.rotation.y = THREE.MathUtils.damp(obj.rotation.y, desiredRot, 6.5, delta);
+      obj.rotation.y = THREE.MathUtils.damp(
+        obj.rotation.y,
+        desiredRot,
+        6.5,
+        delta,
+      );
     });
   });
 
@@ -199,7 +212,13 @@ function SceneContent({
       )}
 
       {inStudio && (
-        <ContactShadows position={[0, 0.01, 0]} opacity={0.4} scale={8} blur={2.2} frames={1} />
+        <ContactShadows
+          position={[0, 0.01, 0]}
+          opacity={0.4}
+          scale={8}
+          blur={2.2}
+          frames={1}
+        />
       )}
 
       <primitive object={gltfScene} onClick={handleSceneClick} />
@@ -207,7 +226,11 @@ function SceneContent({
   );
 }
 
-export default function VietPhucGallery({ embedded = false }: { embedded?: boolean }) {
+export default function VietPhucGallery({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const [activeId, setActiveId] = useState<string>("overview");
   const [isStudio360, setIsStudio360] = useState<boolean>(false);
   const [studioTheme, setStudioTheme] = useState<"warm" | "dark">("warm");
@@ -219,10 +242,11 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
 
   const sortedGarments = useMemo(
     () => [...manifest.garments].sort((a, b) => a.tourOrder - b.tourOrder),
-    []
+    [],
   );
   const currentIndex = sortedGarments.findIndex((g) => g.id === activeId);
-  const currentGarment = currentIndex >= 0 ? sortedGarments[currentIndex] : null;
+  const currentGarment =
+    currentIndex >= 0 ? sortedGarments[currentIndex] : null;
 
   const selectGarment = (id: string) => {
     setActiveId(id);
@@ -237,13 +261,16 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current || activeId === "overview" || isStudio360) return;
+    if (!isDraggingRef.current || activeId === "overview" || isStudio360)
+      return;
     const deltaX = e.clientX - prevXRef.current;
     prevXRef.current = e.clientX;
     targetYawRef.current += deltaX * 0.012;
 
     const norm = Math.abs(targetYawRef.current % (Math.PI * 2));
-    setViewingSide(norm > Math.PI * 0.5 && norm < Math.PI * 1.5 ? "back" : "front");
+    setViewingSide(
+      norm > Math.PI * 0.5 && norm < Math.PI * 1.5 ? "back" : "front",
+    );
   };
 
   const handlePointerUp = () => {
@@ -260,7 +287,8 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
       selectGarment(sortedGarments[0].id);
       return;
     }
-    const nextIdx = (currentIndex + dir + sortedGarments.length) % sortedGarments.length;
+    const nextIdx =
+      (currentIndex + dir + sortedGarments.length) % sortedGarments.length;
     selectGarment(sortedGarments[nextIdx].id);
   };
 
@@ -313,7 +341,12 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
       {!embedded && (
         <div
           onPointerDown={(e) => e.stopPropagation()}
-          style={{ position: "absolute", top: "20px", left: "20px", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            top: "20px",
+            left: "20px",
+            zIndex: 10,
+          }}
         >
           <Link
             href="/"
@@ -355,8 +388,20 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
             zIndex: 10,
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px" }}>
-            <span style={{ color: "#E09F3E", fontWeight: 700, textTransform: "uppercase" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: "11px",
+            }}
+          >
+            <span
+              style={{
+                color: "#E09F3E",
+                fontWeight: 700,
+                textTransform: "uppercase",
+              }}
+            >
               {currentGarment.era}
             </span>
             <span style={{ opacity: 0.7 }}>
@@ -364,7 +409,9 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
             </span>
           </div>
 
-          <h3 style={{ margin: "6px 0 12px", fontSize: "20px", fontWeight: 700 }}>
+          <h3
+            style={{ margin: "6px 0 12px", fontSize: "20px", fontWeight: 700 }}
+          >
             {currentGarment.title}
           </h3>
 
@@ -377,8 +424,16 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
               lineHeight: 1.5,
             }}
           >
-            <strong style={{ color: "#F4A261", display: "block", marginBottom: "4px" }}>
-              {viewingSide === "front" ? "Đặc trưng Mặt trước:" : "Đặc trưng Mặt sau:"}
+            <strong
+              style={{
+                color: "#F4A261",
+                display: "block",
+                marginBottom: "4px",
+              }}
+            >
+              {viewingSide === "front"
+                ? "Đặc trưng Mặt trước:"
+                : "Đặc trưng Mặt sau:"}
             </strong>
             {viewingSide === "front"
               ? currentGarment.highlightFront
@@ -387,7 +442,9 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
 
           {!isStudio360 ? (
             <div style={{ marginTop: "12px" }}>
-              <div style={{ fontSize: "11px", opacity: 0.75, marginBottom: "6px" }}>
+              <div
+                style={{ fontSize: "11px", opacity: 0.75, marginBottom: "6px" }}
+              >
                 Kéo ngang màn hình để xoay bục hoặc chọn góc nhanh:
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
@@ -402,7 +459,10 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
                     cursor: "pointer",
                     fontSize: "12px",
                     fontWeight: 600,
-                    background: viewingSide === "front" ? "#AE443A" : "rgba(255,255,255,0.1)",
+                    background:
+                      viewingSide === "front"
+                        ? "#AE443A"
+                        : "rgba(255,255,255,0.1)",
                     color: "#FFF",
                   }}
                 >
@@ -419,7 +479,10 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
                     cursor: "pointer",
                     fontSize: "12px",
                     fontWeight: 600,
-                    background: viewingSide === "back" ? "#AE443A" : "rgba(255,255,255,0.1)",
+                    background:
+                      viewingSide === "back"
+                        ? "#AE443A"
+                        : "rgba(255,255,255,0.1)",
                     color: "#FFF",
                   }}
                 >
@@ -448,7 +511,10 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
                     border: "none",
                     cursor: "pointer",
                     fontSize: "12px",
-                    background: studioTheme === "warm" ? "#EAE4DC" : "rgba(255,255,255,0.15)",
+                    background:
+                      studioTheme === "warm"
+                        ? "#EAE4DC"
+                        : "rgba(255,255,255,0.15)",
                     color: studioTheme === "warm" ? "#1A120E" : "#FFF",
                   }}
                 >
@@ -463,7 +529,10 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
                     border: "none",
                     cursor: "pointer",
                     fontSize: "12px",
-                    background: studioTheme === "dark" ? "#E09F3E" : "rgba(255,255,255,0.15)",
+                    background:
+                      studioTheme === "dark"
+                        ? "#E09F3E"
+                        : "rgba(255,255,255,0.15)",
                     color: "#FFF",
                   }}
                 >
@@ -489,7 +558,9 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
                 color: "#1A120E",
               }}
             >
-              {isStudio360 ? "← Trở lại Hành lang" : "Soi chi tiết 360° (Cô lập)"}
+              {isStudio360
+                ? "← Trở lại Hành lang"
+                : "Soi chi tiết 360° (Cô lập)"}
             </button>
             <button
               type="button"
@@ -577,7 +648,8 @@ export default function VietPhucGallery({ embedded = false }: { embedded?: boole
               color: "#F5EFE6",
             }}
           >
-            {g.tourOrder}. {g.title.replace(" Truyền Thống", "").replace(" Cung Đình", "")}
+            {g.tourOrder}.{" "}
+            {g.title.replace(" Truyền Thống", "").replace(" Cung Đình", "")}
           </button>
         ))}
       </div>

@@ -1,15 +1,7 @@
 {
   "overview": {
-    "cameraPosition": [
-      0.0,
-      2.15,
-      5.8
-    ],
-    "targetPosition": [
-      0.0,
-      1.35,
-      -3.0
-    ]
+    "cameraPosition": [0.0, 2.15, 5.8],
+    "targetPosition": [0.0, 1.35, -3.0]
   },
   "garments": [
     {
@@ -23,21 +15,9 @@
       "studio360Enabled": true,
       "highlightFront": "Cổ giao lĩnh vắt chéo chữ Y, tay thụng rộng, đai lưng thắt ngang eo.",
       "highlightBack": "Sống lưng suông thẳng nối xuống thường (váy) xếp ly truyền thống.",
-      "pedestalOrigin": [
-        -1.65,
-        0.0,
-        3.5
-      ],
-      "cameraPosition": [
-        0.65,
-        1.4,
-        4.1
-      ],
-      "targetPosition": [
-        -1.65,
-        1.25,
-        3.5
-      ]
+      "pedestalOrigin": [-1.65, 0.0, 3.5],
+      "cameraPosition": [0.65, 1.4, 4.1],
+      "targetPosition": [-1.65, 1.25, 3.5]
     },
     {
       "id": "tu_than",
@@ -50,21 +30,9 @@
       "studio360Enabled": true,
       "highlightFront": "Hai vạt trước buông mềm lộ lớp Yếm đào đỏ son, đi kèm Nón quai thao.",
       "highlightBack": "Hai tà sau may liền dọc sống lưng tạo phom dáng thướt tha.",
-      "pedestalOrigin": [
-        1.65,
-        0.0,
-        0.5
-      ],
-      "cameraPosition": [
-        -0.65,
-        1.4,
-        1.1
-      ],
-      "targetPosition": [
-        1.65,
-        1.25,
-        0.5
-      ]
+      "pedestalOrigin": [1.65, 0.0, 0.5],
+      "cameraPosition": [-0.65, 1.4, 1.1],
+      "targetPosition": [1.65, 1.25, 0.5]
     },
     {
       "id": "ngu_than",
@@ -77,21 +45,9 @@
       "studio360Enabled": true,
       "highlightFront": "Cổ đứng đoan trang, 5 hạt khuy đồng cài chéo từ cổ sang nách phải.",
       "highlightBack": "Đường trung phùng chạy dọc chính giữa lưng biểu trưng cho sự ngay thẳng.",
-      "pedestalOrigin": [
-        -1.65,
-        0.0,
-        -2.5
-      ],
-      "cameraPosition": [
-        0.65,
-        1.4,
-        -1.9
-      ],
-      "targetPosition": [
-        -1.65,
-        1.25,
-        -2.5
-      ]
+      "pedestalOrigin": [-1.65, 0.0, -2.5],
+      "cameraPosition": [0.65, 1.4, -1.9],
+      "targetPosition": [-1.65, 1.25, -2.5]
     },
     {
       "id": "ao_dai",
@@ -104,21 +60,9 @@
       "studio360Enabled": true,
       "highlightFront": "Thân áo chiết eo tôn dáng, tà trước rủ dài trên nền quần lụa trắng.",
       "highlightBack": "Tà sau phẳng phiu, uyển chuyển theo từng nhịp bước.",
-      "pedestalOrigin": [
-        1.65,
-        0.0,
-        -5.5
-      ],
-      "cameraPosition": [
-        -0.65,
-        1.4,
-        -4.9
-      ],
-      "targetPosition": [
-        1.65,
-        1.25,
-        -5.5
-      ]
+      "pedestalOrigin": [1.65, 0.0, -5.5],
+      "cameraPosition": [-0.65, 1.4, -4.9],
+      "targetPosition": [1.65, 1.25, -5.5]
     },
     {
       "id": "nhat_binh",
@@ -131,21 +75,9 @@
       "studio360Enabled": true,
       "highlightFront": "Cổ Nhật Bình chữ nhật to bản thêu kim tuyến, tay áo viền dải ngũ sắc.",
       "highlightBack": "Hoa văn cung đình đối xứng qua trục lưng, đội Mấn vàng uy nghi.",
-      "pedestalOrigin": [
-        0.0,
-        0.15,
-        -7.8
-      ],
-      "cameraPosition": [
-        0.0,
-        1.55,
-        -5.1
-      ],
-      "targetPosition": [
-        0.0,
-        1.45,
-        -7.8
-      ]
+      "pedestalOrigin": [0.0, 0.15, -7.8],
+      "cameraPosition": [0.0, 1.55, -5.1],
+      "targetPosition": [0.0, 1.45, -7.8]
     }
   ]
 }
