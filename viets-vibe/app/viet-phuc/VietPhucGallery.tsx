@@ -54,7 +54,7 @@ function SceneContent({
   onSelectGarment: (id: string) => void;
 }) {
   const { scene: gltfScene } = useGLTF("/models/viet_phuc_gallery.glb");
-  const { scene: rootScene, size } = useThree();
+  const { size } = useThree();
   const controlsRef = useRef<CameraControls>(null);
 
   const isPortrait = size.width < size.height;
@@ -62,6 +62,9 @@ function SceneContent({
     () => manifest.garments.find((g) => g.id === activeId) || null,
     [activeId]
   );
+
+  const inStudio = isStudio360 && activeGarment !== null;
+  const bgColor = inStudio ? STUDIO_THEMES[studioTheme] : CORRIDOR_BG;
 
   const initialRotations = useRef<Record<string, number>>({});
   useEffect(() => {
@@ -73,17 +76,8 @@ function SceneContent({
     });
   }, [gltfScene]);
 
+  // 1. Ẩn/Hiện bối cảnh Hành lang <-> Studio 360° (Không gán trực tiếp vào rootScene nữa)
   useEffect(() => {
-    const inStudio = isStudio360 && activeGarment !== null;
-
-    if (inStudio) {
-      rootScene.background = new THREE.Color(STUDIO_THEMES[studioTheme]);
-      rootScene.fog = null;
-    } else {
-      rootScene.background = new THREE.Color(CORRIDOR_BG);
-      rootScene.fog = new THREE.FogExp2(CORRIDOR_BG, 0.045);
-    }
-
     gltfScene.traverse((obj) => {
       if (obj.name.startsWith("ENV_")) {
         obj.visible = !inStudio;
@@ -91,8 +85,9 @@ function SceneContent({
         obj.visible = inStudio ? obj.name === activeGarment?.meshName : true;
       }
     });
-  }, [isStudio360, activeGarment, studioTheme, gltfScene, rootScene]);
+  }, [inStudio, activeGarment, gltfScene]);
 
+  // 2. Chuyển góc nhìn mượt & tự động lùi khoảng cách cho màn hình dọc điện thoại
   useEffect(() => {
     const controls = controlsRef.current;
     if (!controls) return;
@@ -123,6 +118,7 @@ function SceneContent({
     }
   }, [activeId, activeGarment, isStudio360, isPortrait, targetYawRef]);
 
+  // 3. Nội suy góc xoay Bục Trang phục (Turntable)
   useFrame((_, delta) => {
     manifest.garments.forEach((g) => {
       const obj = gltfScene.getObjectByName(g.meshName);
@@ -136,6 +132,7 @@ function SceneContent({
     });
   });
 
+  // 4. Click vào Mannequin trong hành lang để bay tới
   const handleSceneClick = (e: ThreeEvent<MouseEvent>) => {
     if (isStudio360) return;
     e.stopPropagation();
@@ -155,10 +152,12 @@ function SceneContent({
     }
   };
 
-  const inStudio = isStudio360 && activeGarment !== null;
-
   return (
     <>
+      {/* Khai báo màu nền & sương mù chuẩn R3F (Vượt qua 100% lỗi react-hooks/immutability) */}
+      <color attach="background" args={[bgColor]} />
+      {!inStudio && <fogExp2 attach="fog" args={[CORRIDOR_BG, 0.045]} />}
+
       <CameraControls
         ref={controlsRef}
         smoothTime={0.65}
